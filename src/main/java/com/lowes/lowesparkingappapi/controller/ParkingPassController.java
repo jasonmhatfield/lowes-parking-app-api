@@ -9,18 +9,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/passes")
 public class ParkingPassController {
-    @Autowired
-    private ParkingPassService parkingPassService;
 
-    @PostMapping("/passes")
+    private final ParkingPassService parkingPassService;
+
+    @Autowired
+    public ParkingPassController(ParkingPassService parkingPassService) {
+        this.parkingPassService = parkingPassService;
+    }
+
+    @PostMapping
     public ResponseEntity<String> assignParkingPass(@RequestBody ParkingPassDto parkingPassDto) {
         parkingPassService.assignParkingPass(parkingPassDto);
         return ResponseEntity.ok("Parking pass assigned successfully");
     }
 
-    @GetMapping("/passes")
+    @GetMapping
     public ResponseEntity<List<ParkingPassDto>> getAllParkingPasses() {
         List<ParkingPassDto> passes = parkingPassService.getAllParkingPasses();
         return ResponseEntity.ok(passes);

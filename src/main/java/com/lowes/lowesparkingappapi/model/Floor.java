@@ -1,15 +1,19 @@
 package com.lowes.lowesparkingappapi.model;
 
-import lombok.Data;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 public class Floor {
+
     @Id
     private UUID floorId;
 
@@ -18,7 +22,7 @@ public class Floor {
     private ParkingLot lot;
 
     @ManyToOne
-    @JoinColumn(name = "gate_id")  // Update this line to match the column name in the schema
+    @JoinColumn(name = "gate_id")
     private Gate gate;
 
     private int floorNumber;

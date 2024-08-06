@@ -1,12 +1,15 @@
 package com.lowes.lowesparkingappapi.model;
 
-import lombok.Data;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 public class ParkingPass {
 
     @Id

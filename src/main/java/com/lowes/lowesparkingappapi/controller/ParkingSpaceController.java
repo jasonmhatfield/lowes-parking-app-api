@@ -13,8 +13,12 @@ import java.util.List;
 @RequestMapping("/api/spaces")
 public class ParkingSpaceController {
 
+    private final ParkingSpaceService parkingSpaceService;
+
     @Autowired
-    private ParkingSpaceService parkingSpaceService;
+    public ParkingSpaceController(ParkingSpaceService parkingSpaceService) {
+        this.parkingSpaceService = parkingSpaceService;
+    }
 
     @GetMapping
     public List<ParkingSpace> getAllParkingSpaces() {

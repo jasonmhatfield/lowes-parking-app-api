@@ -1,11 +1,15 @@
 package com.lowes.lowesparkingappapi.dto;
 
 import com.lowes.lowesparkingappapi.model.ParkingSpaceType;
-import lombok.Data;
+import lombok.*;
 
 import java.util.UUID;
 
-@Data
+@Builder
+@NoArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
 public class ParkingSpaceDto {
     private UUID spaceId;
     private UUID floorId;

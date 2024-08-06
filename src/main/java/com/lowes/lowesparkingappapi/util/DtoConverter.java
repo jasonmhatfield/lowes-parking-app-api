@@ -7,35 +7,20 @@ import com.lowes.lowesparkingappapi.model.ParkingPass;
 import com.lowes.lowesparkingappapi.model.ParkingSpace;
 import com.lowes.lowesparkingappapi.model.User;
 
-public class DtoConverter {
-
+public final class DtoConverter {
     public static ParkingPassDto convertToDto(ParkingPass pass) {
-        ParkingPassDto dto = new ParkingPassDto();
-        dto.setUserId(pass.getUser().getUserId());
-        dto.setIssueDate(pass.getIssueDate());
-        dto.setExpiryDate(pass.getExpiryDate());
-        return dto;
+        return ParkingPassDto.builder().userId(pass.getUser().getUserId()).issueDate(pass.getIssueDate())
+                .expiryDate(pass.getExpiryDate()).build();
     }
 
     public static ParkingSpaceDto convertToDto(ParkingSpace space) {
-        ParkingSpaceDto dto = new ParkingSpaceDto();
-        dto.setSpaceId(space.getSpaceId());
-        dto.setFloorId(space.getFloor().getFloorId());
-        dto.setSpaceNumber(space.getSpaceNumber());
-        dto.setOccupied(space.isOccupied());
-        dto.setType(space.getType());
-        return dto;
+        return ParkingSpaceDto.builder().spaceId(space.getSpaceId()).floorId(space.getFloor().getFloorId())
+                .spaceNumber(space.getSpaceNumber()).isOccupied(space.isOccupied()).type(space.getType()).build();
     }
 
     public static UserDto convertToDto(User user) {
-        UserDto userDto = new UserDto();
-        userDto.setUserId(user.getUserId());
-        userDto.setFirstName(user.getFirstName());
-        userDto.setLastName(user.getLastName());
-        userDto.setEmail(user.getEmail());
-        userDto.setRole(user.getRole());
-        userDto.setHasHandicapPlacard(user.isHasHandicapPlacard());
-        userDto.setHasEv(user.isHasEv());
-        return userDto;
+        return UserDto.builder().userId(user.getUserId()).firstName(user.getFirstName()).lastName(user.getLastName())
+                .email(user.getEmail()).role(user.getRole()).hasHandicapPlacard(user.isHasHandicapPlacard())
+                .hasEv(user.isHasEv()).build();
     }
 }

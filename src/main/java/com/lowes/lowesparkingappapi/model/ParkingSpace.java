@@ -1,11 +1,14 @@
 package com.lowes.lowesparkingappapi.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.UUID;
 
-@Data
 @Entity
+@Getter
+@Setter
 public class ParkingSpace {
     @Id
     @GeneratedValue

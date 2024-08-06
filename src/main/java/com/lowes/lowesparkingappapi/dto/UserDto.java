@@ -1,10 +1,14 @@
 package com.lowes.lowesparkingappapi.dto;
 
-import lombok.Data;
+import lombok.*;
 
 import java.util.UUID;
 
-@Data
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDto {
     private UUID userId;
     private String firstName;

@@ -1,24 +1,17 @@
 package com.lowes.lowesparkingappapi.dto;
 
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Data
+@Builder
+@NoArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
 public class ParkingPassDto {
-
     private UUID userId;
     private LocalDate issueDate;
     private LocalDate expiryDate;
-
-    public ParkingPassDto() {
-    }
-
-    public ParkingPassDto(UUID userId, LocalDate issueDate, LocalDate expiryDate) {
-        this.userId = userId;
-        this.issueDate = issueDate;
-        this.expiryDate = expiryDate;
-    }
-
 }
