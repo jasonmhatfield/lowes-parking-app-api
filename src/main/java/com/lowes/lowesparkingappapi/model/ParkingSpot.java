@@ -12,11 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Gate {
+public class ParkingSpot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String gateName;
-    private boolean isOperational;
+    private String spotNumber;
+    private boolean isOccupied;
+    private String type; // regular, handicap, ev
+    private Long userId; // null if not occupied
 }
