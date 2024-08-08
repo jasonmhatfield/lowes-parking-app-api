@@ -10,15 +10,13 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DtoConverterTest {
 
     private ParkingPass parkingPass;
     private ParkingSpace parkingSpace;
     private User user;
-    private Floor floor;
 
     @BeforeEach
     void setUp() {
@@ -37,7 +35,7 @@ class DtoConverterTest {
         parkingPass.setIssueDate(LocalDate.now());
         parkingPass.setExpiryDate(LocalDate.now().plusDays(30));
 
-        floor = new Floor();
+        Floor floor = new Floor();
         floor.setFloorId(UUID.randomUUID());
         floor.setFloorNumber(1);
 
@@ -62,6 +60,7 @@ class DtoConverterTest {
     void testConvertToParkingSpaceDto() {
         ParkingSpaceDto dto = DtoConverter.convertToDto(parkingSpace);
 
+        assertNotNull(parkingSpace.getFloor());
         assertEquals(parkingSpace.getSpaceId(), dto.getSpaceId());
         assertEquals(parkingSpace.getFloor().getFloorId(), dto.getFloorId());
         assertEquals(parkingSpace.getSpaceNumber(), dto.getSpaceNumber());
@@ -83,8 +82,70 @@ class DtoConverterTest {
     }
 
     @Test
-    void testDtoConverterConstructor() {
-        DtoConverter converter = new DtoConverter();
-        assertNotNull(converter, "Constructor should not be null");
+    void testConvertDtoToParkingPass() {
+        ParkingPassDto dto = DtoConverter.convertToDto(parkingPass);
+        ParkingPass entity = DtoConverter.convertDtoToParkingPass(dto, user);
+
+        assertEquals(dto.getPassId(), entity.getPassId());
+        assertEquals(dto.getUserId(), entity.getUser().getUserId());
+        assertEquals(dto.getIssueDate(), entity.getIssueDate());
+        assertEquals(dto.getExpiryDate(), entity.getExpiryDate());
+    }
+
+    @Test
+    void testConvertDtoToParkingSpace() {
+        ParkingSpaceDto dto = DtoConverter.convertToDto(parkingSpace);
+        ParkingSpace entity = DtoConverter.convertDtoToParkingSpace(dto);
+
+        assertEquals(dto.getSpaceId(), entity.getSpaceId());
+        assertEquals(dto.getSpaceNumber(), entity.getSpaceNumber());
+        assertEquals(dto.isOccupied(), entity.isOccupied());
+        assertEquals(dto.getType(), entity.getType());
+    }
+
+    @Test
+    void testConvertDtoToUser() {
+        UserDto dto = DtoConverter.convertToDto(user);
+        User entity = DtoConverter.convertDtoToUser(dto);
+
+        assertEquals(dto.getUserId(), entity.getUserId());
+        assertEquals(dto.getFirstName(), entity.getFirstName());
+        assertEquals(dto.getLastName(), entity.getLastName());
+        assertEquals(dto.getEmail(), entity.getEmail());
+        assertEquals(dto.getRole(), entity.getRole());
+        assertEquals(dto.isHasHandicapPlacard(), entity.isHasHandicapPlacard());
+        assertEquals(dto.isHasEv(), entity.isHasEv());
+    }
+
+    @Test
+    void testConvertUserToEntity() {
+        UserDto dto = DtoConverter.convertToDto(user);
+        User entity = DtoConverter.convertUserToEntity(dto);
+
+        assertEquals(dto.getUserId(), entity.getUserId());
+        assertEquals(dto.getFirstName(), entity.getFirstName());
+        assertEquals(dto.getLastName(), entity.getLastName());
+        assertEquals(dto.getEmail(), entity.getEmail());
+        assertEquals(dto.getRole(), entity.getRole());
+        assertEquals(dto.isHasHandicapPlacard(), entity.isHasHandicapPlacard());
+        assertEquals(dto.isHasEv(), entity.isHasEv());
+    }
+
+    @Test
+    void testConvertToDtoParkingPassWithNullUser() {
+        parkingPass.setUser(null);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> DtoConverter.convertToDto(parkingPass));
+
+        assertEquals("ParkingPass user cannot be null", exception.getMessage());
+    }
+
+    @Test
+    void testConvertToDtoParkingSpaceWithNullFloor() {
+        parkingSpace.setFloor(null);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> DtoConverter.convertToDto(parkingSpace));
+
+        assertEquals("ParkingSpace floor cannot be null", exception.getMessage());
     }
 }

@@ -3,11 +3,15 @@ package com.lowes.lowesparkingappapi.util;
 import com.lowes.lowesparkingappapi.dto.ParkingPassDto;
 import com.lowes.lowesparkingappapi.dto.ParkingSpaceDto;
 import com.lowes.lowesparkingappapi.dto.UserDto;
-import com.lowes.lowesparkingappapi.model.ParkingPass;
-import com.lowes.lowesparkingappapi.model.ParkingSpace;
-import com.lowes.lowesparkingappapi.model.User;
+import com.lowes.lowesparkingappapi.model.*;
 
 public final class DtoConverter {
+
+    // Private constructor to prevent instantiation
+    private DtoConverter() {
+        throw new UnsupportedOperationException("Utility class");
+    }
+
     public static ParkingPassDto convertParkingPassToDto(ParkingPass pass) {
         if (pass.getUser() == null) {
             throw new IllegalArgumentException("ParkingPass user cannot be null");
@@ -21,6 +25,9 @@ public final class DtoConverter {
     }
 
     public static ParkingSpaceDto convertParkingSpaceToDto(ParkingSpace space) {
+        if (space.getFloor() == null) {
+            throw new IllegalArgumentException("ParkingSpace floor cannot be null");
+        }
         return ParkingSpaceDto.builder()
                 .spaceId(space.getSpaceId())
                 .floorId(space.getFloor().getFloorId())
