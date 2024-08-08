@@ -1,6 +1,7 @@
 package com.lowes.lowesparkingappapi.controller;
 
 import com.lowes.lowesparkingappapi.dto.UserDto;
+import com.lowes.lowesparkingappapi.exception.UserNotFoundException;
 import com.lowes.lowesparkingappapi.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +52,17 @@ class UserControllerTest {
     }
 
     @Test
+    void testGetUserByIdNotFound() {
+        UUID userId = UUID.randomUUID();
+        when(userService.getUserById(userId)).thenThrow(new UserNotFoundException("User not found with id: " + userId));
+
+        ResponseEntity<UserDto> response = userController.getUserById(userId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(userService, times(1)).getUserById(userId);
+    }
+
+    @Test
     void testCreateUser() {
         UserDto newUser = UserDto.builder().build();
         UserDto mockUser = UserDto.builder().build();
@@ -78,6 +90,18 @@ class UserControllerTest {
     }
 
     @Test
+    void testUpdateUserNotFound() {
+        UUID userId = UUID.randomUUID();
+        UserDto updatedUser = UserDto.builder().build();
+        when(userService.updateUser(userId, updatedUser)).thenThrow(new UserNotFoundException("User not found with id: " + userId));
+
+        ResponseEntity<UserDto> response = userController.updateUser(userId, updatedUser);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(userService, times(1)).updateUser(userId, updatedUser);
+    }
+
+    @Test
     void testDeleteUser() {
         UUID userId = UUID.randomUUID();
 
@@ -88,13 +112,26 @@ class UserControllerTest {
     }
 
     @Test
+    void testDeleteUserNotFound() {
+        UUID userId = UUID.randomUUID();
+        doThrow(new UserNotFoundException("User not found with id: " + userId)).when(userService).deleteUser(userId);
+
+        ResponseEntity<Void> response = userController.deleteUser(userId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(userService, times(1)).deleteUser(userId);
+    }
+
+    @Test
     void testRegisterUser() {
         UserDto newUser = UserDto.builder().build();
+        UserDto mockUser = UserDto.builder().build();
+        when(userService.createUser(newUser)).thenReturn(mockUser);
 
-        ResponseEntity<String> response = userController.registerUser(newUser);
+        ResponseEntity<UserDto> response = userController.registerUser(newUser);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("User registered successfully", response.getBody());
-        verify(userService, times(1)).registerUser(newUser);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(mockUser, response.getBody());
+        verify(userService, times(1)).createUser(newUser);
     }
 }

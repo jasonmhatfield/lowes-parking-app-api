@@ -1,6 +1,7 @@
 package com.lowes.lowesparkingappapi.service;
 
 import com.lowes.lowesparkingappapi.dto.UserDto;
+import com.lowes.lowesparkingappapi.exception.UserNotFoundException;
 import com.lowes.lowesparkingappapi.model.User;
 import com.lowes.lowesparkingappapi.repository.UserRepository;
 import com.lowes.lowesparkingappapi.util.DtoConverter;
@@ -33,7 +34,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userId = UUID.randomUUID();  // Ensure the same UUID is used throughout the test
+        userId = UUID.randomUUID();
         user = new User();
         user.setUserId(userId);
         user.setFirstName("John");
@@ -81,9 +82,10 @@ class UserServiceTest {
     void testGetUserByIdNotFound() {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        UserDto result = userService.getUserById(userId);
+        assertThrows(UserNotFoundException.class, () -> {
+            userService.getUserById(userId);
+        });
 
-        assertNull(result);
         verify(userRepository, times(1)).findById(userId);
     }
 
@@ -115,17 +117,33 @@ class UserServiceTest {
     void testUpdateUserNotFound() {
         when(userRepository.existsById(userId)).thenReturn(false);
 
-        UserDto result = userService.updateUser(userId, userDto);
+        assertThrows(UserNotFoundException.class, () -> {
+            userService.updateUser(userId, userDto);
+        });
 
-        assertNull(result);
         verify(userRepository, times(1)).existsById(userId);
         verify(userRepository, times(0)).save(any(User.class));
     }
 
     @Test
     void testDeleteUser() {
+        when(userRepository.existsById(userId)).thenReturn(true);
+        doNothing().when(userRepository).deleteById(userId);
+
         userService.deleteUser(userId);
 
         verify(userRepository, times(1)).deleteById(userId);
+    }
+
+    @Test
+    void testDeleteUserNotFound() {
+        when(userRepository.existsById(userId)).thenReturn(false);
+
+        assertThrows(UserNotFoundException.class, () -> {
+            userService.deleteUser(userId);
+        });
+
+        verify(userRepository, times(1)).existsById(userId);
+        verify(userRepository, times(0)).deleteById(userId);
     }
 }

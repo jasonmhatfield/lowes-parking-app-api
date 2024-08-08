@@ -52,7 +52,7 @@ public class ParkingSimulationService {
             }
         }
 
-        return parkingSpaces.stream().map(DtoConverter::convertToDto).collect(Collectors.toList());
+        return parkingSpaces.stream().map(DtoConverter::convertParkingSpaceToDto).collect(Collectors.toList());
     }
 
     ParkingPass getRandomParkingPass(List<ParkingPass> parkingPasses, Set<UUID> occupiedPassIds, Random random) {

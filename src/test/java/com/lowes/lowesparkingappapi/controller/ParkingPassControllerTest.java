@@ -28,10 +28,9 @@ class ParkingPassControllerTest {
     void testAssignParkingPass() {
         ParkingPassDto parkingPassDto = ParkingPassDto.builder().build();
 
-        ResponseEntity<String> response = parkingPassController.assignParkingPass(parkingPassDto);
+        ResponseEntity<Void> response = parkingPassController.assignParkingPass(parkingPassDto);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Parking pass assigned successfully", response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
         verify(parkingPassService, times(1)).assignParkingPass(parkingPassDto);
     }
 

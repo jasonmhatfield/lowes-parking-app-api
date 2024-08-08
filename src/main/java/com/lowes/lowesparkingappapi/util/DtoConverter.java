@@ -8,19 +8,87 @@ import com.lowes.lowesparkingappapi.model.ParkingSpace;
 import com.lowes.lowesparkingappapi.model.User;
 
 public final class DtoConverter {
+    public static ParkingPassDto convertParkingPassToDto(ParkingPass pass) {
+        return ParkingPassDto.builder()
+                .passId(pass.getPassId())
+                .userId(pass.getUser().getUserId())
+                .issueDate(pass.getIssueDate())
+                .expiryDate(pass.getExpiryDate())
+                .build();
+    }
+
+    public static ParkingSpaceDto convertParkingSpaceToDto(ParkingSpace space) {
+        return ParkingSpaceDto.builder()
+                .spaceId(space.getSpaceId())
+                .floorId(space.getFloor().getFloorId())
+                .spaceNumber(space.getSpaceNumber())
+                .isOccupied(space.isOccupied())
+                .type(space.getType())
+                .build();
+    }
+
+    public static UserDto convertUserToDto(User user) {
+        return UserDto.builder()
+                .userId(user.getUserId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .hasHandicapPlacard(user.isHasHandicapPlacard())
+                .hasEv(user.isHasEv())
+                .build();
+    }
+
+    public static ParkingPass convertDtoToParkingPass(ParkingPassDto passDto) {
+        ParkingPass pass = new ParkingPass();
+        pass.setPassId(passDto.getPassId());
+        pass.setIssueDate(passDto.getIssueDate());
+        pass.setExpiryDate(passDto.getExpiryDate());
+        return pass;
+    }
+
+    public static ParkingSpace convertDtoToParkingSpace(ParkingSpaceDto spaceDto) {
+        ParkingSpace space = new ParkingSpace();
+        space.setSpaceId(spaceDto.getSpaceId());
+        space.setSpaceNumber(spaceDto.getSpaceNumber());
+        space.setOccupied(spaceDto.isOccupied());
+        space.setType(spaceDto.getType());
+        return space;
+    }
+
+    public static User convertDtoToUser(UserDto userDto) {
+        User user = new User();
+        user.setUserId(userDto.getUserId());
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setEmail(userDto.getEmail());
+        user.setRole(userDto.getRole());
+        user.setHasHandicapPlacard(userDto.isHasHandicapPlacard());
+        user.setHasEv(userDto.isHasEv());
+        return user;
+    }
+
     public static ParkingPassDto convertToDto(ParkingPass pass) {
-        return ParkingPassDto.builder().userId(pass.getUser().getUserId()).issueDate(pass.getIssueDate())
-                .expiryDate(pass.getExpiryDate()).build();
+        return convertParkingPassToDto(pass);
     }
 
     public static ParkingSpaceDto convertToDto(ParkingSpace space) {
-        return ParkingSpaceDto.builder().spaceId(space.getSpaceId()).floorId(space.getFloor().getFloorId())
-                .spaceNumber(space.getSpaceNumber()).isOccupied(space.isOccupied()).type(space.getType()).build();
+        return convertParkingSpaceToDto(space);
     }
 
     public static UserDto convertToDto(User user) {
-        return UserDto.builder().userId(user.getUserId()).firstName(user.getFirstName()).lastName(user.getLastName())
-                .email(user.getEmail()).role(user.getRole()).hasHandicapPlacard(user.isHasHandicapPlacard())
-                .hasEv(user.isHasEv()).build();
+        return convertUserToDto(user);
+    }
+
+    public static User convertUserToEntity(UserDto userDto) {
+        return User.builder()
+                .userId(userDto.getUserId())
+                .firstName(userDto.getFirstName())
+                .lastName(userDto.getLastName())
+                .email(userDto.getEmail())
+                .role(userDto.getRole())
+                .hasHandicapPlacard(userDto.isHasHandicapPlacard())
+                .hasEv(userDto.isHasEv())
+                .build();
     }
 }

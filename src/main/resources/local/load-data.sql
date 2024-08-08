@@ -24,17 +24,18 @@ INSERT INTO parking_lot (lot_id, name)
 VALUES (UUID(), 'Main Parking Lot');
 
 -- Insert gates associated with 'Main Parking Lot'
-INSERT INTO gate (gate_id, lot_id, gate_name)
-SELECT UUID(), lot_id, 'South Gate'
+INSERT INTO gate (gate_id, lot_id, gate_name, is_operational, is_restricted)
+SELECT UUID(), lot_id, 'South Gate', TRUE, FALSE
 FROM parking_lot
 WHERE name = 'Main Parking Lot'
 LIMIT 1;
 
-INSERT INTO gate (gate_id, lot_id, gate_name)
-SELECT UUID(), lot_id, 'North Gate'
+INSERT INTO gate (gate_id, lot_id, gate_name, is_operational, is_restricted)
+SELECT UUID(), lot_id, 'North Gate', TRUE, FALSE
 FROM parking_lot
 WHERE name = 'Main Parking Lot'
 LIMIT 1;
+
 
 -- Insert floors associated with 'Main Parking Lot' and respective gates
 INSERT INTO floor (floor_id, lot_id, gate_id, floor_number)

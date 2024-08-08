@@ -1,8 +1,10 @@
 package com.lowes.lowesparkingappapi.service;
 
 import com.lowes.lowesparkingappapi.dto.UserDto;
+import com.lowes.lowesparkingappapi.exception.UserNotFoundException;
 import com.lowes.lowesparkingappapi.model.User;
 import com.lowes.lowesparkingappapi.repository.UserRepository;
+import com.lowes.lowesparkingappapi.util.DtoConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,52 +15,49 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
+    private final UserRepository userRepository;
+
     @Autowired
-    private UserRepository userRepository;
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream().map(this::convertToDto).collect(Collectors.toList());
+        return userRepository.findAll().stream()
+                .map(DtoConverter::convertUserToDto)
+                .collect(Collectors.toList());
     }
 
     public UserDto getUserById(UUID userId) {
-        return userRepository.findById(userId).map(this::convertToDto)
-                .orElse(null);  // Handle the not found case appropriately
+        return userRepository.findById(userId)
+                .map(DtoConverter::convertUserToDto)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
     }
 
     public UserDto createUser(UserDto userDto) {
-        User user = convertToEntity(userDto);
+        User user = DtoConverter.convertUserToEntity(userDto);
         user = userRepository.save(user);
-        return convertToDto(user);
+        return DtoConverter.convertUserToDto(user);
     }
 
     public UserDto updateUser(UUID userId, UserDto userDto) {
-        if (userRepository.existsById(userId)) {
-            User user = convertToEntity(userDto);
-            user.setUserId(userId);
-            user = userRepository.save(user);
-            return convertToDto(user);
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException("User not found with id: " + userId);
         }
-        return null;  // Handle the not found case appropriately
+        User user = DtoConverter.convertUserToEntity(userDto);
+        user.setUserId(userId);
+        user = userRepository.save(user);
+        return DtoConverter.convertUserToDto(user);
     }
 
     public void deleteUser(UUID userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException("User not found with id: " + userId);
+        }
         userRepository.deleteById(userId);
     }
 
-    public void registerUser(UserDto userDto) {
-        User user = convertToEntity(userDto);
-        userRepository.save(user);
-    }
-
-    private UserDto convertToDto(User user) {
-        return UserDto.builder().userId(user.getUserId()).firstName(user.getFirstName()).lastName(user.getLastName())
-                .email(user.getEmail()).role(user.getRole()).hasHandicapPlacard(user.isHasHandicapPlacard())
-                .hasEv(user.isHasEv()).build();
-    }
-
-    private User convertToEntity(UserDto userDto) {
-        return User.builder().userId(userDto.getUserId()).firstName(userDto.getFirstName())
-                .lastName(userDto.getLastName()).email(userDto.getEmail()).role(userDto.getRole())
-                .hasHandicapPlacard(userDto.isHasHandicapPlacard()).hasEv(userDto.isHasEv()).build();
+    public UserDto registerUser(UserDto userDto) {
+        return createUser(userDto);
     }
 }
