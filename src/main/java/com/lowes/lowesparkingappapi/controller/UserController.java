@@ -1,8 +1,11 @@
 package com.lowes.lowesparkingappapi.controller;
 
+import com.lowes.lowesparkingappapi.dto.ParkingPassDto;
 import com.lowes.lowesparkingappapi.dto.UserDto;
 import com.lowes.lowesparkingappapi.exception.UserNotFoundException;
+import com.lowes.lowesparkingappapi.service.ParkingPassService;
 import com.lowes.lowesparkingappapi.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +18,12 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final ParkingPassService parkingPassService;
 
-    public UserController(UserService userService) {
+    @Autowired
+    public UserController(UserService userService, ParkingPassService parkingPassService) {
         this.userService = userService;
+        this.parkingPassService = parkingPassService;
     }
 
     @GetMapping
@@ -36,7 +42,13 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userDto));
+        UserDto newUser = userService.createUser(userDto);
+        if (userDto.getParkingPass() != null) {
+            ParkingPassDto parkingPassDto = userDto.getParkingPass();
+            parkingPassDto.setUserId(newUser.getUserId());
+            parkingPassService.assignParkingPass(parkingPassDto);
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
 
     @PutMapping("/{id}")

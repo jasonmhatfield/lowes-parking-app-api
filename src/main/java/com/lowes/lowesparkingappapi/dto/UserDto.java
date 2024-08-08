@@ -17,4 +17,5 @@ public class UserDto {
     private String role;
     private boolean hasHandicapPlacard;
     private boolean hasEv;
+    private ParkingPassDto parkingPass;
 }
