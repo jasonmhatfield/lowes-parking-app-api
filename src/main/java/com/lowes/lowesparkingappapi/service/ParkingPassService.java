@@ -28,7 +28,7 @@ public class ParkingPassService {
 
     public ParkingPassDto getParkingPassByUserId(UUID userId) {
         Optional<ParkingPass> parkingPassOpt = parkingPassRepository.findByUser_UserId(userId);
-        if (!parkingPassOpt.isPresent()) {
+        if (parkingPassOpt.isEmpty()) {
             return null; // Return null if no parking pass is found
         }
         ParkingPass parkingPass = parkingPassOpt.get();
@@ -37,11 +37,24 @@ public class ParkingPassService {
 
     public void assignParkingPass(ParkingPassDto parkingPassDto) {
         Optional<User> userOpt = userRepository.findById(parkingPassDto.getUserId());
-        if (!userOpt.isPresent()) {
+        if (userOpt.isEmpty()) {
             throw new IllegalArgumentException("User not found for ID: " + parkingPassDto.getUserId());
         }
         ParkingPass parkingPass = DtoConverter.convertDtoToParkingPass(parkingPassDto, userOpt.get());
         parkingPassRepository.save(parkingPass);
+    }
+
+    public boolean updateParkingPass(UUID passId, ParkingPassDto parkingPassDto) {
+        Optional<ParkingPass> existingPassOpt = parkingPassRepository.findById(passId);
+        if (existingPassOpt.isPresent()) {
+            ParkingPass existingPass = existingPassOpt.get();
+            existingPass.setIssueDate(parkingPassDto.getIssueDate());
+            existingPass.setExpiryDate(parkingPassDto.getExpiryDate());
+            parkingPassRepository.save(existingPass);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public List<ParkingPassDto> getAllParkingPasses() {

@@ -34,6 +34,15 @@ public class ParkingPassController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @PutMapping("/{passId}")
+    public ResponseEntity<Void> updateParkingPass(@PathVariable UUID passId, @RequestBody ParkingPassDto parkingPassDto) {
+        if (parkingPassService.updateParkingPass(passId, parkingPassDto)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
     @GetMapping
     public ResponseEntity<List<ParkingPassDto>> getAllParkingPasses() {
         List<ParkingPassDto> parkingPasses = parkingPassService.getAllParkingPasses();
