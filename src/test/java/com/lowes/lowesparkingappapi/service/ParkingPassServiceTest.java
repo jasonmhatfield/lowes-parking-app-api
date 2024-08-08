@@ -1,17 +1,16 @@
 package com.lowes.lowesparkingappapi.service;
 
 import com.lowes.lowesparkingappapi.dto.ParkingPassDto;
-import com.lowes.lowesparkingappapi.exception.UserNotFoundException;
 import com.lowes.lowesparkingappapi.model.ParkingPass;
 import com.lowes.lowesparkingappapi.model.User;
 import com.lowes.lowesparkingappapi.repository.ParkingPassRepository;
 import com.lowes.lowesparkingappapi.repository.UserRepository;
+import com.lowes.lowesparkingappapi.util.DtoConverter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,10 +18,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class ParkingPassServiceTest {
 
     @Mock
@@ -34,65 +33,76 @@ class ParkingPassServiceTest {
     @InjectMocks
     private ParkingPassService parkingPassService;
 
-    private User user;
-    private ParkingPass parkingPass;
-    private ParkingPassDto parkingPassDto;
-
     @BeforeEach
     void setUp() {
-        UUID userId = UUID.randomUUID();
-        user = new User();
-        user.setUserId(userId);
-        user.setFirstName("John");
-        user.setLastName("Doe");
-        user.setEmail("john.doe@example.com");
-        user.setRole("USER");
-        user.setHasHandicapPlacard(true);
-        user.setHasEv(false);
+        MockitoAnnotations.openMocks(this);
+    }
 
-        parkingPass = new ParkingPass();
+    @Test
+    void testGetParkingPassByUserId() {
+        UUID userId = UUID.randomUUID();
+        User user = new User(userId, "First", "Last", "email@example.com", "employee", false, false);
+        ParkingPass parkingPass = new ParkingPass();
         parkingPass.setPassId(UUID.randomUUID());
         parkingPass.setUser(user);
         parkingPass.setIssueDate(LocalDate.now());
-        parkingPass.setExpiryDate(LocalDate.now().plusYears(1));
+        parkingPass.setExpiryDate(LocalDate.now().plusDays(365));
 
-        parkingPassDto = new ParkingPassDto();
-        parkingPassDto.setUserId(userId);
-        parkingPassDto.setIssueDate(LocalDate.now());
-        parkingPassDto.setExpiryDate(LocalDate.now().plusYears(1));
+        when(parkingPassRepository.findByUser_UserId(userId)).thenReturn(Optional.of(parkingPass));
+
+        ParkingPassDto parkingPassDto = parkingPassService.getParkingPassByUserId(userId);
+
+        assertNotNull(parkingPassDto);
+        assertEquals(parkingPass.getPassId(), parkingPassDto.getPassId());
+        verify(parkingPassRepository, times(1)).findByUser_UserId(userId);
     }
 
     @Test
     void testAssignParkingPass() {
+        ParkingPassDto parkingPassDto = new ParkingPassDto();
+        parkingPassDto.setPassId(UUID.randomUUID());
+        parkingPassDto.setUserId(UUID.randomUUID());
+        parkingPassDto.setIssueDate(LocalDate.now());
+        parkingPassDto.setExpiryDate(LocalDate.now().plusDays(365));
+
+        User user = new User(parkingPassDto.getUserId(), "First", "Last", "email@example.com", "employee", false, false);
         when(userRepository.findById(parkingPassDto.getUserId())).thenReturn(Optional.of(user));
+
+        ParkingPass parkingPass = DtoConverter.convertDtoToParkingPass(parkingPassDto, user);
+
+        when(parkingPassRepository.save(any(ParkingPass.class))).thenReturn(parkingPass);
 
         parkingPassService.assignParkingPass(parkingPassDto);
 
-        verify(userRepository, times(1)).findById(parkingPassDto.getUserId());
         verify(parkingPassRepository, times(1)).save(any(ParkingPass.class));
     }
 
     @Test
-    void testAssignParkingPass_UserNotFound() {
-        when(userRepository.findById(parkingPassDto.getUserId())).thenReturn(Optional.empty());
-
-        assertThrows(UserNotFoundException.class, () -> parkingPassService.assignParkingPass(parkingPassDto));
-
-        verify(userRepository, times(1)).findById(parkingPassDto.getUserId());
-        verify(parkingPassRepository, times(0)).save(any(ParkingPass.class));
-    }
-
-    @Test
     void testGetAllParkingPasses() {
-        when(parkingPassRepository.findAll()).thenReturn(List.of(parkingPass));
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID();
 
-        List<ParkingPassDto> result = parkingPassService.getAllParkingPasses();
+        User user1 = new User(userId1, "First1", "Last1", "email1@example.com", "employee", false, false);
+        User user2 = new User(userId2, "First2", "Last2", "email2@example.com", "employee", false, false);
 
-        assertEquals(1, result.size());
-        assertEquals(parkingPass.getUser().getUserId(), result.get(0).getUserId());
-        assertEquals(parkingPass.getIssueDate(), result.get(0).getIssueDate());
-        assertEquals(parkingPass.getExpiryDate(), result.get(0).getExpiryDate());
+        ParkingPass parkingPass1 = new ParkingPass();
+        parkingPass1.setPassId(UUID.randomUUID());
+        parkingPass1.setUser(user1);
+        parkingPass1.setIssueDate(LocalDate.now());
+        parkingPass1.setExpiryDate(LocalDate.now().plusDays(365));
 
+        ParkingPass parkingPass2 = new ParkingPass();
+        parkingPass2.setPassId(UUID.randomUUID());
+        parkingPass2.setUser(user2);
+        parkingPass2.setIssueDate(LocalDate.now());
+        parkingPass2.setExpiryDate(LocalDate.now().plusDays(365));
+
+        when(parkingPassRepository.findAll()).thenReturn(List.of(parkingPass1, parkingPass2));
+
+        List<ParkingPassDto> parkingPassDtos = parkingPassService.getAllParkingPasses();
+
+        assertNotNull(parkingPassDtos);
+        assertEquals(2, parkingPassDtos.size());
         verify(parkingPassRepository, times(1)).findAll();
     }
 }

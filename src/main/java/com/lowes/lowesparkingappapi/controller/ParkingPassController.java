@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -25,5 +26,17 @@ public class ParkingPassController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return 404 if no pass is found
         }
         return ResponseEntity.ok(parkingPassDto);
+    }
+
+    @PostMapping
+    public ResponseEntity<Void> assignParkingPass(@RequestBody ParkingPassDto parkingPassDto) {
+        parkingPassService.assignParkingPass(parkingPassDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ParkingPassDto>> getAllParkingPasses() {
+        List<ParkingPassDto> parkingPasses = parkingPassService.getAllParkingPasses();
+        return ResponseEntity.ok(parkingPasses);
     }
 }

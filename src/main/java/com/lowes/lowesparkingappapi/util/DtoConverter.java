@@ -9,6 +9,9 @@ import com.lowes.lowesparkingappapi.model.User;
 
 public final class DtoConverter {
     public static ParkingPassDto convertParkingPassToDto(ParkingPass pass) {
+        if (pass.getUser() == null) {
+            throw new IllegalArgumentException("ParkingPass user cannot be null");
+        }
         return ParkingPassDto.builder()
                 .passId(pass.getPassId())
                 .userId(pass.getUser().getUserId())
@@ -39,9 +42,10 @@ public final class DtoConverter {
                 .build();
     }
 
-    public static ParkingPass convertDtoToParkingPass(ParkingPassDto passDto) {
+    public static ParkingPass convertDtoToParkingPass(ParkingPassDto passDto, User user) {
         ParkingPass pass = new ParkingPass();
         pass.setPassId(passDto.getPassId());
+        pass.setUser(user);
         pass.setIssueDate(passDto.getIssueDate());
         pass.setExpiryDate(passDto.getExpiryDate());
         return pass;
