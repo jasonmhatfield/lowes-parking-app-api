@@ -24,6 +24,7 @@ public class GateController {
 
     @PatchMapping("/gates/{id}")
     public Gate updateGateStatus(@PathVariable Long id, @RequestParam boolean isOperational) {
+        System.out.println("Received request to update gate " + id + " to isOperational: " + isOperational);
         return gateService.updateGateStatus(id, isOperational);
     }
 }

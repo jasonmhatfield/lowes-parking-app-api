@@ -21,7 +21,9 @@ public class ParkingSpotController {
 
     @GetMapping("/parkingSpots")
     public List<ParkingSpot> getAllParkingSpots() {
-        return parkingSpotService.getAllParkingSpots();
+        List<ParkingSpot> spots = parkingSpotService.getAllParkingSpots();
+        spots.forEach(spot -> System.out.println("ParkingSpot: " + spot.getSpotNumber() + " - isOccupied: " + spot.isOccupied()));
+        return spots;
     }
 
     @PatchMapping("/parkingSpots/{id}")
@@ -47,6 +49,7 @@ public class ParkingSpotController {
 
             spot.setOccupied(isOccupied);
             spot.setUserId(isOccupied ? userId : null);
+            System.out.println("Updated ParkingSpot: " + spot.getSpotNumber() + " - isOccupied: " + spot.isOccupied());
         }
 
         ParkingSpot updatedSpot = parkingSpotService.saveParkingSpot(spot);

@@ -21,8 +21,11 @@ public class GateService {
     }
 
     public Gate updateGateStatus(Long id, boolean isOperational) {
-        Gate gate = gateRepository.findById(id).orElseThrow();
+        Gate gate = gateRepository.findById(id).orElseThrow(() -> new RuntimeException("Gate not found"));
+        System.out.println("Updating gate " + gate.getId() + " to isOperational: " + isOperational);
         gate.setOperational(isOperational);
-        return gateRepository.save(gate);
+        Gate updatedGate = gateRepository.save(gate);
+        System.out.println("Updated gate status: " + updatedGate.isOperational());
+        return updatedGate;
     }
 }
