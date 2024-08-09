@@ -10,8 +10,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class GateController {
+    private final GateService gateService;
+
     @Autowired
-    private GateService gateService;
+    public GateController(GateService gateService) {
+        this.gateService = gateService;
+    }
 
     @GetMapping("/gates")
     public List<Gate> getAllGates() {

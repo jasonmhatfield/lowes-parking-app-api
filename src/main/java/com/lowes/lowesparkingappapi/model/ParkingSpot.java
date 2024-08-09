@@ -4,11 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -20,5 +19,5 @@ public class ParkingSpot {
     private String spotNumber;
     private boolean isOccupied;
     private String type; // regular, handicap, ev
-    private Long userId; // null if not occupied
+    private Long userId;
 }

@@ -9,8 +9,12 @@ import java.util.List;
 
 @Service
 public class GateService {
+    private final GateRepository gateRepository;
+
     @Autowired
-    private GateRepository gateRepository;
+    public GateService(GateRepository gateRepository) {
+        this.gateRepository = gateRepository;
+    }
 
     public List<Gate> getAllGates() {
         return gateRepository.findAll();

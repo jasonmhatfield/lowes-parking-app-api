@@ -12,8 +12,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class ParkingSpotController {
+    private final ParkingSpotService parkingSpotService;
+
     @Autowired
-    private ParkingSpotService parkingSpotService;
+    public ParkingSpotController(ParkingSpotService parkingSpotService) {
+        this.parkingSpotService = parkingSpotService;
+    }
 
     @GetMapping("/parkingSpots")
     public List<ParkingSpot> getAllParkingSpots() {
@@ -23,20 +27,26 @@ public class ParkingSpotController {
     @PatchMapping("/parkingSpots/{id}")
     public ResponseEntity<ParkingSpot> updateParkingSpot(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
         ParkingSpot spot = parkingSpotService.getParkingSpotById(id);
+
         if (spot == null) {
             return ResponseEntity.notFound().build();
         }
 
         if (updates.containsKey("isOccupied")) {
-            spot.setOccupied((Boolean) updates.get("isOccupied"));
-        }
-        if (updates.containsKey("userId")) {
-            Object userIdObj = updates.get("userId");
-            if (userIdObj instanceof Integer) {
-                spot.setUserId(((Integer) userIdObj).longValue());
-            } else if (userIdObj instanceof Long) {
-                spot.setUserId((Long) userIdObj);
+            Boolean isOccupied = (Boolean) updates.get("isOccupied");
+            Long userId = null;
+
+            if (updates.containsKey("userId") && updates.get("userId") != null) {
+                userId = ((Number) updates.get("userId")).longValue();
             }
+
+            // Check if the spot is already occupied by another user
+            if (isOccupied && spot.isOccupied() && (spot.getUserId() == null || !spot.getUserId().equals(userId))) {
+                return ResponseEntity.status(403).body(null);
+            }
+
+            spot.setOccupied(isOccupied);
+            spot.setUserId(isOccupied ? userId : null);
         }
 
         ParkingSpot updatedSpot = parkingSpotService.saveParkingSpot(spot);

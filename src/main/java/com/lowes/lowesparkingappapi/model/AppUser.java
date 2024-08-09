@@ -1,16 +1,14 @@
 package com.lowes.lowesparkingappapi.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "APP_USER")
-public class User {
+public class AppUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,5 +18,5 @@ public class User {
     private String email;
     private boolean hasHandicapPlacard;
     private boolean hasEv;
-    private String role; // default to "employee"
+    private String role;
 }

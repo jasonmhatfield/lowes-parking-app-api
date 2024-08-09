@@ -9,19 +9,21 @@ import java.util.List;
 
 @Service
 public class ParkingSpotService {
+    private final ParkingSpotRepository parkingSpotRepository;
+
     @Autowired
-    private ParkingSpotRepository parkingSpotRepository;
+    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository) {
+        this.parkingSpotRepository = parkingSpotRepository;
+    }
 
     public List<ParkingSpot> getAllParkingSpots() {
         return parkingSpotRepository.findAll();
     }
 
-    // New method to get a parking spot by ID
     public ParkingSpot getParkingSpotById(Long id) {
         return parkingSpotRepository.findById(id).orElse(null);
     }
 
-    // New method to save a parking spot
     public ParkingSpot saveParkingSpot(ParkingSpot spot) {
         return parkingSpotRepository.save(spot);
     }
