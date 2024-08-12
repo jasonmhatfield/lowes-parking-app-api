@@ -1,3 +1,9 @@
+INSERT INTO GATE (gate_name, is_operational)
+VALUES ('South Gate', TRUE);
+
+INSERT INTO GATE (gate_name, is_operational)
+VALUES ('North Gate', TRUE);
+
 -- Insert an admin user
 INSERT INTO APP_USER (first_name, last_name, email, role, has_handicap_placard, has_ev)
 VALUES ('Jason', 'Hatfield', 'jason.hatfield@lowes.com', 'admin', FALSE, FALSE);
@@ -23,7 +29,7 @@ SELECT '1' || LPAD(x, 2, '0'), FALSE,
        CASE WHEN x <= 3 THEN 'handicap'
             WHEN x <= 8 THEN 'ev'
             ELSE 'regular' END, NULL
-FROM SYSTEM_RANGE(1, 25);
+FROM SYSTEM_RANGE(1, 26);
 
 -- Level 2 (201 to 225)
 INSERT INTO PARKING_SPOT (spot_number, is_occupied, type, user_id)
@@ -31,7 +37,7 @@ SELECT '2' || LPAD(x, 2, '0'), FALSE,
        CASE WHEN x <= 3 THEN 'handicap'
             WHEN x <= 8 THEN 'ev'
             ELSE 'regular' END, NULL
-FROM SYSTEM_RANGE(1, 25);
+FROM SYSTEM_RANGE(1, 26);
 
 -- Level 3 (301 to 325)
 INSERT INTO PARKING_SPOT (spot_number, is_occupied, type, user_id)
@@ -39,7 +45,7 @@ SELECT '3' || LPAD(x, 2, '0'), FALSE,
        CASE WHEN x <= 3 THEN 'handicap'
             WHEN x <= 8 THEN 'ev'
             ELSE 'regular' END, NULL
-FROM SYSTEM_RANGE(1, 25);
+FROM SYSTEM_RANGE(1, 26);
 
 -- Level 4 (401 to 425)
 INSERT INTO PARKING_SPOT (spot_number, is_occupied, type, user_id)
@@ -47,4 +53,4 @@ SELECT '4' || LPAD(x, 2, '0'), FALSE,
        CASE WHEN x <= 3 THEN 'handicap'
             WHEN x <= 8 THEN 'ev'
             ELSE 'regular' END, NULL
-FROM SYSTEM_RANGE(1, 25);
+FROM SYSTEM_RANGE(1, 26);
