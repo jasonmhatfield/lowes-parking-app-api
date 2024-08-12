@@ -28,10 +28,13 @@ public class ParkingSpotService {
         return parkingSpotRepository.save(spot);
     }
 
-    public ParkingSpot updateParkingSpot(Long id, boolean isOccupied, Long userId) {
-        ParkingSpot spot = parkingSpotRepository.findById(id).orElseThrow();
-        spot.setOccupied(isOccupied);
-        spot.setUserId(isOccupied ? userId : null);
-        return parkingSpotRepository.save(spot);
+    public boolean isParkingFull() {
+        return parkingSpotRepository.findAll().stream().allMatch(ParkingSpot::isOccupied);
+    }
+
+    public boolean isEvParkingFull() {
+        return parkingSpotRepository.findAll().stream()
+                .filter(spot -> "ev".equals(spot.getType()))
+                .allMatch(ParkingSpot::isOccupied);
     }
 }

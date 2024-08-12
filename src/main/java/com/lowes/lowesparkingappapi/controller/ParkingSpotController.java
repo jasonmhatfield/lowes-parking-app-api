@@ -4,6 +4,7 @@ import com.lowes.lowesparkingappapi.model.ParkingSpot;
 import com.lowes.lowesparkingappapi.service.ParkingSpotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,10 +14,12 @@ import java.util.Map;
 @RequestMapping("/api")
 public class ParkingSpotController {
     private final ParkingSpotService parkingSpotService;
+    private final SimpMessagingTemplate messagingTemplate; // For WebSocket messages
 
     @Autowired
-    public ParkingSpotController(ParkingSpotService parkingSpotService) {
+    public ParkingSpotController(ParkingSpotService parkingSpotService, SimpMessagingTemplate messagingTemplate) {
         this.parkingSpotService = parkingSpotService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @GetMapping("/parkingSpots")
@@ -53,6 +56,21 @@ public class ParkingSpotController {
         }
 
         ParkingSpot updatedSpot = parkingSpotService.saveParkingSpot(spot);
+
+        // Broadcast the updated spot to clients
+        messagingTemplate.convertAndSend("/topic/parkingSpots", updatedSpot);
+
+        System.out.println("Broadcasting parking spot update: " + updatedSpot);
+
+        // Send notifications
+        if (parkingSpotService.isParkingFull()) {
+            messagingTemplate.convertAndSend("/topic/notifications", "Parking is full");
+        }
+
+        if (parkingSpotService.isEvParkingFull()) {
+            messagingTemplate.convertAndSend("/topic/notifications", "EV parking spots are full");
+        }
+
         return ResponseEntity.ok(updatedSpot);
     }
 }

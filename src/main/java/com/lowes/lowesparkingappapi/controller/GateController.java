@@ -3,6 +3,7 @@ package com.lowes.lowesparkingappapi.controller;
 import com.lowes.lowesparkingappapi.model.Gate;
 import com.lowes.lowesparkingappapi.service.GateService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,10 +12,12 @@ import java.util.List;
 @RequestMapping("/api")
 public class GateController {
     private final GateService gateService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
-    public GateController(GateService gateService) {
+    public GateController(GateService gateService, SimpMessagingTemplate messagingTemplate) {
         this.gateService = gateService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @GetMapping("/gates")
@@ -24,7 +27,9 @@ public class GateController {
 
     @PatchMapping("/gates/{id}")
     public Gate updateGateStatus(@PathVariable Long id, @RequestParam boolean isOperational) {
-        System.out.println("Received request to update gate " + id + " to isOperational: " + isOperational);
-        return gateService.updateGateStatus(id, isOperational);
+        Gate updatedGate = gateService.updateGateStatus(id, isOperational);
+        System.out.println("Broadcasting gate update: " + updatedGate);
+        messagingTemplate.convertAndSend("/topic/gates", updatedGate); // Broadcast to /topic/gates
+        return updatedGate;
     }
 }
