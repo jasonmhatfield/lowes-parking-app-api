@@ -31,46 +31,45 @@ public class ParkingSpotController {
 
     @PatchMapping("/parkingSpots/{id}")
     public ResponseEntity<ParkingSpot> updateParkingSpot(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+        System.out.println("Received update request for spot ID: " + id);
+        System.out.println("Request payload: " + updates);
+
         ParkingSpot spot = parkingSpotService.getParkingSpotById(id);
 
         if (spot == null) {
             return ResponseEntity.notFound().build();
         }
 
-        if (updates.containsKey("isOccupied")) {
-            Boolean isOccupied = (Boolean) updates.get("isOccupied");
+        boolean updated = false;
+
+        if (updates.containsKey("occupied")) { // Check the key
+            Boolean isOccupied = (Boolean) updates.get("occupied");
             Long userId = null;
 
-            if (updates.containsKey("userId") && updates.get("userId") != null) {
-                userId = ((Number) updates.get("userId")).longValue();
+            if (updates.containsKey("userId")) {
+                userId = updates.get("userId") != null ? ((Number) updates.get("userId")).longValue() : null;
             }
 
-            // Check if the spot is already occupied by another user
-            if (isOccupied && spot.isOccupied() && (spot.getUserId() == null || !spot.getUserId().equals(userId))) {
-                return ResponseEntity.status(403).body(null);
-            }
-
+            // Update the spot's status
             spot.setOccupied(isOccupied);
             spot.setUserId(isOccupied ? userId : null);
-            System.out.println("Updated ParkingSpot: " + spot.getSpotNumber() + " - isOccupied: " + spot.isOccupied());
+
+            updated = true;
+
+            System.out.println("Updated ParkingSpot: " + spot.getSpotNumber() + " - isOccupied: " + spot.isOccupied() + ", userId: " + spot.getUserId());
         }
 
-        ParkingSpot updatedSpot = parkingSpotService.saveParkingSpot(spot);
+        if (updated) {
+            ParkingSpot updatedSpot = parkingSpotService.saveParkingSpot(spot);
 
-        // Broadcast the updated spot to clients
-        messagingTemplate.convertAndSend("/topic/parkingSpots", updatedSpot);
+            // Broadcast the updated spot to clients
+            messagingTemplate.convertAndSend("/topic/parkingSpots", updatedSpot);
 
-        System.out.println("Broadcasting parking spot update: " + updatedSpot);
+            System.out.println("Broadcasting parking spot update: " + updatedSpot);
 
-        // Send notifications
-        if (parkingSpotService.isParkingFull()) {
-            messagingTemplate.convertAndSend("/topic/notifications", "Parking is full");
+            return ResponseEntity.ok(updatedSpot);
         }
 
-        if (parkingSpotService.isEvParkingFull()) {
-            messagingTemplate.convertAndSend("/topic/notifications", "EV parking spots are full");
-        }
-
-        return ResponseEntity.ok(updatedSpot);
+        return ResponseEntity.badRequest().build(); // If no update was made, return a bad request
     }
 }
