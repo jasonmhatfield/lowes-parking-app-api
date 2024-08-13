@@ -4,70 +4,64 @@ import com.lowes.lowesparkingappapi.model.Gate;
 import com.lowes.lowesparkingappapi.service.GateService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(GateController.class)
 public class GateControllerTest {
 
-    @Mock
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
     private GateService gateService;
 
-    @Mock
+    @MockBean
     private SimpMessagingTemplate messagingTemplate;
 
-    @InjectMocks
-    private GateController gateController;
-
-    private Gate gate1;
-    private Gate gate2;
+    private Gate gate;
 
     @BeforeEach
-    void setUp() {
-        gate1 = new Gate();
-        gate1.setGateId(UUID.randomUUID());
-        gate1.setGateName("Gate 1");
-        gate1.setIsOperational(true);
-
-        gate2 = new Gate();
-        gate2.setGateId(UUID.randomUUID());
-        gate2.setGateName("Gate 2");
-        gate2.setIsOperational(false);
+    public void setUp() {
+        gate = new Gate();
+        gate.setId(1L);
+        gate.setGateName("Main Gate");
+        gate.setOperational(true);
     }
 
     @Test
-    void testGetAllGates() {
-        List<Gate> gates = Arrays.asList(gate1, gate2);
-        when(gateService.getAllGates()).thenReturn(gates);
+    public void testGetAllGates() throws Exception {
+        Mockito.when(gateService.getAllGates()).thenReturn(Collections.singletonList(gate));
 
-        ResponseEntity<List<Gate>> response = gateController.getAllGates();
-
-        assertEquals(ResponseEntity.ok(gates), response);
-        verify(gateService, times(1)).getAllGates();
+        mockMvc.perform(get("/api/gates"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[{'id':1,'gateName':'Main Gate','operational':true}]"));
     }
 
     @Test
-    void testUpdateGateStatus() {
-        UUID gateId = gate1.getGateId();
-        when(gateService.updateGateStatus(eq(gateId), any(Boolean.class))).thenReturn(gate1);
+    public void testUpdateGateStatus() throws Exception {
+        Mockito.when(gateService.updateGateStatus(anyLong(), anyBoolean())).thenReturn(gate);
 
-        ResponseEntity<Gate> response = gateController.updateGateStatus(gateId, gate1);
+        mockMvc.perform(patch("/api/gates/1")
+                        .param("isOperational", "true")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{'id':1,'gateName':'Main Gate','operational':true}"));
 
-        assertEquals(ResponseEntity.ok(gate1), response);
-        verify(gateService, times(1)).updateGateStatus(gateId, gate1.getIsOperational());
-        verify(messagingTemplate, times(1)).convertAndSend("/topic/gates", gate1);
+        Mockito.verify(messagingTemplate).convertAndSend("/topic/gates", gate);
     }
 }

@@ -1,77 +1,69 @@
 package com.lowes.lowesparkingappapi.service;
 
-import com.lowes.lowesparkingappapi.exception.ResourceNotFoundException;
 import com.lowes.lowesparkingappapi.model.Gate;
 import com.lowes.lowesparkingappapi.repository.GateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 
-@ExtendWith(MockitoExtension.class)
-class GateServiceTest {
+@SpringBootTest
+public class GateServiceTest {
 
-    @Mock
-    private GateRepository gateRepository;
-
-    @InjectMocks
+    @Autowired
     private GateService gateService;
 
-    private UUID gateId;
+    @MockBean
+    private GateRepository gateRepository;
+
     private Gate gate;
 
     @BeforeEach
-    void setUp() {
-        gateId = UUID.randomUUID();
+    public void setUp() {
         gate = new Gate();
-        gate.setGateId(gateId);
+        gate.setId(1L);
         gate.setGateName("Main Gate");
-        gate.setIsOperational(true);
+        gate.setOperational(true);
     }
 
     @Test
-    void testGetAllGates() {
-        List<Gate> gates = List.of(gate);
-        when(gateRepository.findAll()).thenReturn(gates);
+    public void testGetAllGates() {
+        Mockito.when(gateRepository.findAll()).thenReturn(Collections.singletonList(gate));
 
-        List<Gate> result = gateService.getAllGates();
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(gateId, result.get(0).getGateId());
-        verify(gateRepository, times(1)).findAll();
+        List<Gate> gates = gateService.getAllGates();
+        assertNotNull(gates);
+        assertEquals(1, gates.size());
+        assertEquals(gate.getId(), gates.get(0).getId());
     }
 
     @Test
-    void testUpdateGateStatus() {
-        when(gateRepository.findById(gateId)).thenReturn(Optional.of(gate));
-        when(gateRepository.save(any(Gate.class))).thenReturn(gate);
+    public void testUpdateGateStatus_Found() {
+        Mockito.when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
+        Mockito.when(gateRepository.save(any(Gate.class))).thenReturn(gate);
 
-        Gate updatedGate = gateService.updateGateStatus(gateId, false);
-
+        Gate updatedGate = gateService.updateGateStatus(1L, false);
         assertNotNull(updatedGate);
-        assertFalse(updatedGate.getIsOperational());
-        verify(gateRepository, times(1)).findById(gateId);
-        verify(gateRepository, times(1)).save(gate);
+        assertFalse(updatedGate.isOperational());
+        assertEquals(gate.getId(), updatedGate.getId());
     }
 
     @Test
-    void testUpdateGateStatusGateNotFound() {
-        when(gateRepository.findById(gateId)).thenReturn(Optional.empty());
+    public void testUpdateGateStatus_NotFound() {
+        Mockito.when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> gateService.updateGateStatus(gateId, false));
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> gateService.updateGateStatus(999L, false));
 
-        assertEquals("Gate not found with id: " + gateId, exception.getMessage());
-        verify(gateRepository, times(1)).findById(gateId);
-        verify(gateRepository, never()).save(any(Gate.class));
+        assertEquals("Gate not found with id: 999", exception.getMessage());
     }
 }

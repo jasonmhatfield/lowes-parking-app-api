@@ -3,33 +3,33 @@ package com.lowes.lowesparkingappapi.controller;
 import com.lowes.lowesparkingappapi.model.Gate;
 import com.lowes.lowesparkingappapi.service.GateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/gates")
 public class GateController {
 
-  @Autowired
-  private GateService gateService;
+    private final GateService gateService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-  @Autowired
-  private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    public GateController(GateService gateService, SimpMessagingTemplate messagingTemplate) {
+        this.gateService = gateService;
+        this.messagingTemplate = messagingTemplate;
+    }
 
-  @GetMapping
-  public ResponseEntity<List<Gate>> getAllGates() {
-    List<Gate> gates = gateService.getAllGates();
-    return ResponseEntity.ok(gates);
-  }
+    @GetMapping
+    public List<Gate> getAllGates() {
+        return gateService.getAllGates();
+    }
 
-  @PutMapping("/{gateId}")
-  public ResponseEntity<Gate> updateGateStatus(@PathVariable UUID gateId, @RequestBody Gate gate) {
-    Gate updatedGate = gateService.updateGateStatus(gateId, gate.getIsOperational());
-    messagingTemplate.convertAndSend("/topic/gates", updatedGate); // Send update to WebSocket topic
-    return ResponseEntity.ok(updatedGate);
-  }
+    @PatchMapping("/{id}")
+    public Gate updateGateStatus(@PathVariable Long id, @RequestParam boolean isOperational) {
+        Gate updatedGate = gateService.updateGateStatus(id, isOperational);
+        messagingTemplate.convertAndSend("/topic/gates", updatedGate);
+        return updatedGate;
+    }
 }

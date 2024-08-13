@@ -1,138 +1,128 @@
--- Insert an admin user
-INSERT INTO app_user (user_id, first_name, last_name, email, role, has_handicap_placard, has_ev)
-VALUES (UUID(), 'Jason', 'Hatfield', 'jason.hatfield@lowes.com', 'admin', FALSE, FALSE);
+-- Insert Gates
+INSERT INTO GATE (gate_name, is_operational)
+VALUES
+    ('South Gate', TRUE),
+    ('North Gate', TRUE);
 
--- Insert three dedicated employee users with specific roles
-INSERT INTO app_user (user_id, first_name, last_name, email, role, has_handicap_placard, has_ev)
-VALUES (UUID(), 'John', 'Doe', 'john.doe@lowes.com', 'employee', FALSE, FALSE);
+-- Insert an admin user and hard-coded employees
+INSERT INTO APP_USER (first_name, last_name, email, role, has_handicap_placard, has_ev)
+VALUES
+    ('Jason', 'Hatfield', 'jason.hatfield@lowes.com', 'admin', FALSE, FALSE),
+    ('Michael', 'Smith', 'michael.smith@lowes.com', 'employee', TRUE, FALSE),
+    ('Emily', 'Johnson', 'emily.johnson@lowes.com', 'employee', FALSE, TRUE);
 
-INSERT INTO app_user (user_id, first_name, last_name, email, role, has_handicap_placard, has_ev)
-VALUES (UUID(), 'Jane', 'Smith', 'jane.smith@lowes.com', 'employee', FALSE, TRUE);
+-- Insert 98 additional employee users
+INSERT INTO APP_USER (first_name, last_name, email, role, has_handicap_placard, has_ev)
+VALUES
+    ('David', 'Miller', 'david.miller@lowes.com', 'employee', FALSE, TRUE),
+    ('Sarah', 'Brown', 'sarah.brown@lowes.com', 'employee', FALSE, FALSE),
+    ('James', 'Williams', 'james.williams@lowes.com', 'employee', TRUE, TRUE),
+    ('Jennifer', 'Jones', 'jennifer.jones@lowes.com', 'employee', FALSE, TRUE),
+    ('Robert', 'Garcia', 'robert.garcia@lowes.com', 'employee', TRUE, FALSE),
+    ('Jessica', 'Martinez', 'jessica.martinez@lowes.com', 'employee', FALSE, TRUE),
+    ('John', 'Davis', 'john.davis@lowes.com', 'employee', TRUE, FALSE),
+    ('Elizabeth', 'Lopez', 'elizabeth.lopez@lowes.com', 'employee', FALSE, TRUE),
+    ('Christopher', 'Gonzalez', 'christopher.gonzalez@lowes.com', 'employee', TRUE, FALSE),
+    ('Ashley', 'Wilson', 'ashley.wilson@lowes.com', 'employee', FALSE, TRUE),
+    ('Matthew', 'Anderson', 'matthew.anderson@lowes.com', 'employee', FALSE, FALSE),
+    ('Amanda', 'Thomas', 'amanda.thomas@lowes.com', 'employee', TRUE, TRUE),
+    ('Joshua', 'Taylor', 'joshua.taylor@lowes.com', 'employee', FALSE, TRUE),
+    ('Megan', 'Lee', 'megan.lee@lowes.com', 'employee', TRUE, FALSE),
+    ('Andrew', 'Perez', 'andrew.perez@lowes.com', 'employee', FALSE, FALSE),
+    ('Daniel', 'Moore', 'daniel.moore@lowes.com', 'employee', FALSE, TRUE),
+    ('Hannah', 'Clark', 'hannah.clark@lowes.com', 'employee', TRUE, FALSE),
+    ('Joseph', 'Lewis', 'joseph.lewis@lowes.com', 'employee', FALSE, TRUE),
+    ('Victoria', 'Robinson', 'victoria.robinson@lowes.com', 'employee', TRUE, FALSE),
+    ('Benjamin', 'Walker', 'benjamin.walker@lowes.com', 'employee', FALSE, TRUE),
+    ('Rachel', 'Young', 'rachel.young@lowes.com', 'employee', TRUE, TRUE),
+    ('Samuel', 'King', 'samuel.king@lowes.com', 'employee', FALSE, FALSE),
+    ('Sophia', 'Wright', 'sophia.wright@lowes.com', 'employee', TRUE, FALSE),
+    ('Alexander', 'Scott', 'alexander.scott@lowes.com', 'employee', FALSE, TRUE),
+    ('Brandon', 'Hill', 'brandon.hill@lowes.com', 'employee', FALSE, FALSE),
+    ('Laura', 'Green', 'laura.green@lowes.com', 'employee', TRUE, FALSE),
+    ('Aaron', 'Adams', 'aaron.adams@lowes.com', 'employee', FALSE, TRUE),
+    ('Olivia', 'Baker', 'olivia.baker@lowes.com', 'employee', TRUE, FALSE),
+    ('Nathan', 'Gonzalez', 'nathan.gonzalez@lowes.com', 'employee', FALSE, TRUE),
+    ('Sophia', 'Carter', 'sophia.carter@lowes.com', 'employee', TRUE, FALSE),
+    ('Zachary', 'Mitchell', 'zachary.mitchell@lowes.com', 'employee', FALSE, TRUE),
+    ('Lily', 'Parker', 'lily.parker@lowes.com', 'employee', TRUE, FALSE),
+    ('Ethan', 'Evans', 'ethan.evans@lowes.com', 'employee', FALSE, TRUE),
+    ('Samantha', 'Edwards', 'samantha.edwards@lowes.com', 'employee', TRUE, TRUE),
+    ('Dylan', 'Collins', 'dylan.collins@lowes.com', 'employee', FALSE, FALSE),
+    ('Charlotte', 'Stewart', 'charlotte.stewart@lowes.com', 'employee', TRUE, FALSE),
+    ('Gabriel', 'Morris', 'gabriel.morris@lowes.com', 'employee', FALSE, TRUE),
+    ('Victoria', 'Rogers', 'victoria.rogers@lowes.com', 'employee', TRUE, FALSE),
+    ('Jack', 'Reed', 'jack.reed@lowes.com', 'employee', FALSE, TRUE),
+    ('Abigail', 'Cook', 'abigail.cook@lowes.com', 'employee', TRUE, FALSE),
+    ('Lucas', 'Morgan', 'lucas.morgan@lowes.com', 'employee', FALSE, TRUE),
+    ('Grace', 'Bell', 'grace.bell@lowes.com', 'employee', TRUE, FALSE),
+    ('Owen', 'Murphy', 'owen.murphy@lowes.com', 'employee', FALSE, TRUE),
+    ('Chloe', 'Bailey', 'chloe.bailey@lowes.com', 'employee', TRUE, FALSE),
+    ('Landon', 'Rivera', 'landon.rivera@lowes.com', 'employee', FALSE, TRUE),
+    ('Avery', 'Cooper', 'avery.cooper@lowes.com', 'employee', TRUE, TRUE),
+    ('Isaac', 'Richardson', 'isaac.richardson@lowes.com', 'employee', FALSE, FALSE),
+    ('Ellie', 'Cox', 'ellie.cox@lowes.com', 'employee', TRUE, FALSE),
+    ('Jackson', 'Ward', 'jackson.ward@lowes.com', 'employee', FALSE, TRUE),
+    ('Ella', 'Perez', 'ella.perez@lowes.com', 'employee', TRUE, FALSE),
+    ('Henry', 'Gray', 'henry.gray@lowes.com', 'employee', FALSE, TRUE),
+    ('Isabella', 'James', 'isabella.james@lowes.com', 'employee', TRUE, FALSE),
+    ('Lucas', 'Watson', 'lucas.watson@lowes.com', 'employee', FALSE, TRUE),
+    ('Amelia', 'Brooks', 'amelia.brooks@lowes.com', 'employee', TRUE, FALSE),
+    ('Aiden', 'Bennett', 'aiden.bennett@lowes.com', 'employee', FALSE, TRUE),
+    ('Mia', 'Wood', 'mia.wood@lowes.com', 'employee', TRUE, FALSE),
+    ('Caleb', 'Hughes', 'caleb.hughes@lowes.com', 'employee', FALSE, TRUE),
+    ('Ariana', 'Flores', 'ariana.flores@lowes.com', 'employee', TRUE, FALSE),
+    ('Liam', 'Powell', 'liam.powell@lowes.com', 'employee', FALSE, TRUE),
+    ('Natalie', 'Barnes', 'natalie.barnes@lowes.com', 'employee', TRUE, FALSE),
+    ('Noah', 'Long', 'noah.long@lowes.com', 'employee', FALSE, TRUE),
+    ('Lydia', 'Sanders', 'lydia.sanders@lowes.com', 'employee', TRUE, FALSE),
+    ('Wyatt', 'Price', 'wyatt.price@lowes.com', 'employee', FALSE, TRUE),
+    ('Sofia', 'Jenkins', 'sofia.jenkins@lowes.com', 'employee', TRUE, FALSE),
+    ('Carter', 'Reyes', 'carter.reyes@lowes.com', 'employee', FALSE, TRUE),
+    ('Riley', 'Ramirez', 'riley.ramirez@lowes.com', 'employee', TRUE, FALSE),
+    ('Asher', 'Myers', 'asher.myers@lowes.com', 'employee', FALSE, TRUE),
+    ('Ella', 'Ross', 'ella.ross@lowes.com', 'employee', TRUE, TRUE),
+    ('Landon', 'Morales', 'landon.morales@lowes.com', 'employee', FALSE, FALSE),
+    ('Aubrey', 'Foster', 'aubrey.foster@lowes.com', 'employee', TRUE, FALSE),
+    ('Benjamin', 'Griffin', 'benjamin.griffin@lowes.com', 'employee', FALSE, TRUE),
+    ('Chloe', 'Perry', 'chloe.perry@lowes.com', 'employee', TRUE, FALSE),
+    ('Daniel', 'Henderson', 'daniel.henderson@lowes.com', 'employee', FALSE, TRUE),
+    ('Lily', 'Coleman', 'lily.coleman@lowes.com', 'employee', TRUE, TRUE),
+    ('James', 'Howard', 'james.howard@lowes.com', 'employee', FALSE, FALSE),
+    ('Grace', 'Warren', 'grace.warren@lowes.com', 'employee', TRUE, FALSE),
+    ('Eli', 'Patterson', 'eli.patterson@lowes.com', 'employee', FALSE, TRUE),
+    ('Zoey', 'Reed', 'zoey.reed@lowes.com', 'employee', TRUE, FALSE),
+    ('Henry', 'Cooper', 'henry.cooper@lowes.com', 'employee', FALSE, TRUE),
+    ('Scarlett', 'Bailey', 'scarlett.bailey@lowes.com', 'employee', TRUE, FALSE),
+    ('Nathan', 'Turner', 'nathan.turner@lowes.com', 'employee', FALSE, TRUE),
+    ('Ava', 'Hayes', 'ava.hayes@lowes.com', 'employee', TRUE, FALSE),
+    ('Owen', 'Cox', 'owen.cox@lowes.com', 'employee', FALSE, TRUE),
+    ('Mia', 'Diaz', 'mia.diaz@lowes.com', 'employee', TRUE, TRUE),
+    ('Logan', 'Hughes', 'logan.hughes@lowes.com', 'employee', FALSE, FALSE),
+    ('Lila', 'Butler', 'lila.butler@lowes.com', 'employee', TRUE, FALSE),
+    ('Ryan', 'Foster', 'ryan.foster@lowes.com', 'employee', FALSE, TRUE),
+    ('Ella', 'Sullivan', 'ella.sullivan@lowes.com', 'employee', TRUE, FALSE),
+    ('Jackson', 'Murphy', 'jackson.murphy@lowes.com', 'employee', FALSE, TRUE),
+    ('Sophie', 'Rivera', 'sophie.rivera@lowes.com', 'employee', TRUE, TRUE),
+    ('Ethan', 'Collins', 'ethan.collins@lowes.com', 'employee', FALSE, FALSE),
+    ('Aubrey', 'Bell', 'aubrey.bell@lowes.com', 'employee', TRUE, FALSE),
+    ('Luke', 'Green', 'luke.green@lowes.com', 'employee', FALSE, TRUE),
+    ('Emma', 'Kelly', 'emma.kelly@lowes.com', 'employee', TRUE, FALSE),
+    ('Grayson', 'Ward', 'grayson.ward@lowes.com', 'employee', FALSE, TRUE),
+    ('Madeline', 'Ross', 'madeline.ross@lowes.com', 'employee', TRUE, FALSE),
+    ('Caleb', 'Powell', 'caleb.powell@lowes.com', 'employee', FALSE, TRUE),
+    ('Liam', 'Hughes', 'liam.hughes@lowes.com', 'employee', FALSE, TRUE);
 
-INSERT INTO app_user (user_id, first_name, last_name, email, role, has_handicap_placard, has_ev)
-VALUES (UUID(), 'Alice', 'Johnson', 'alice.johnson@lowes.com', 'employee', TRUE, FALSE);
-
--- Insert 996 additional employee users with randomized attributes
-INSERT INTO app_user (user_id, first_name, last_name, email, role, has_handicap_placard, has_ev)
-SELECT UUID(), 'FirstName' || x, 'LastName' || x, 'user' || x || '@lowes.com', 'employee',
-       CASE WHEN RAND() < 0.01 THEN TRUE ELSE FALSE END,
-       CASE WHEN RAND() < 0.05 THEN TRUE ELSE FALSE END
-FROM SYSTEM_RANGE(5, 1000);
-
--- Insert a parking lot named 'Main Parking Lot'
-INSERT INTO parking_lot (lot_id, name)
-VALUES (UUID(), 'Main Parking Lot');
-
--- Insert gates associated with 'Main Parking Lot'
-INSERT INTO gate (gate_id, lot_id, gate_name, is_operational, is_restricted)
-SELECT UUID(), lot_id, 'South Gate', TRUE, FALSE
-FROM parking_lot
-WHERE name = 'Main Parking Lot'
-LIMIT 1;
-
-INSERT INTO gate (gate_id, lot_id, gate_name, is_operational, is_restricted)
-SELECT UUID(), lot_id, 'North Gate', TRUE, FALSE
-FROM parking_lot
-WHERE name = 'Main Parking Lot'
-LIMIT 1;
-
-
--- Insert floors associated with 'Main Parking Lot' and respective gates
-INSERT INTO floor (floor_id, lot_id, gate_id, floor_number)
-SELECT UUID(), parking_lot.lot_id, gate.gate_id, 4
-FROM parking_lot
-         JOIN gate ON parking_lot.lot_id = gate.lot_id
-WHERE parking_lot.name = 'Main Parking Lot'
-  AND gate.gate_name = 'South Gate'
-LIMIT 1;
-
-INSERT INTO floor (floor_id, lot_id, gate_id, floor_number)
-SELECT UUID(), parking_lot.lot_id, gate.gate_id, 6
-FROM parking_lot
-         JOIN gate ON parking_lot.lot_id = gate.lot_id
-WHERE parking_lot.name = 'Main Parking Lot'
-  AND gate.gate_name = 'South Gate'
-LIMIT 1;
-
-INSERT INTO floor (floor_id, lot_id, gate_id, floor_number)
-SELECT UUID(), parking_lot.lot_id, gate.gate_id, 8
-FROM parking_lot
-         JOIN gate ON parking_lot.lot_id = gate.lot_id
-WHERE parking_lot.name = 'Main Parking Lot'
-  AND gate.gate_name = 'South Gate'
-LIMIT 1;
-
-INSERT INTO floor (floor_id, lot_id, gate_id, floor_number)
-SELECT UUID(), parking_lot.lot_id, gate.gate_id, 5
-FROM parking_lot
-         JOIN gate ON parking_lot.lot_id = gate.lot_id
-WHERE parking_lot.name = 'Main Parking Lot'
-  AND gate.gate_name = 'North Gate'
-LIMIT 1;
-
-INSERT INTO floor (floor_id, lot_id, gate_id, floor_number)
-SELECT UUID(), parking_lot.lot_id, gate.gate_id, 7
-FROM parking_lot
-         JOIN gate ON parking_lot.lot_id = gate.lot_id
-WHERE parking_lot.name = 'Main Parking Lot'
-  AND gate.gate_name = 'North Gate'
-LIMIT 1;
-
--- Insert parking spaces for each floor with specific space types (accessible, EV, regular)
-INSERT INTO parking_space (space_id, floor_id, space_number, is_occupied, type)
-SELECT UUID(), f.floor_id, CONCAT('4', LPAD(x, 3, '0')), FALSE,
-       CASE WHEN x <= 3 THEN 'ACCESSIBLE'
-            WHEN x <= 11 THEN 'EV'
-            ELSE 'REGULAR' END
-FROM floor f,
-     SYSTEM_RANGE(1, 150) x
-WHERE f.floor_number = 4;
-
-INSERT INTO parking_space (space_id, floor_id, space_number, is_occupied, type)
-SELECT UUID(), f.floor_id, CONCAT('6', LPAD(x, 3, '0')), FALSE,
-       CASE WHEN x <= 3 THEN 'ACCESSIBLE'
-            WHEN x <= 11 THEN 'EV'
-            ELSE 'REGULAR' END
-FROM floor f,
-     SYSTEM_RANGE(1, 150) x
-WHERE f.floor_number = 6;
-
-INSERT INTO parking_space (space_id, floor_id, space_number, is_occupied, type)
-SELECT UUID(), f.floor_id, CONCAT('8', LPAD(x, 3, '0')), FALSE,
-       CASE WHEN x <= 3 THEN 'ACCESSIBLE'
-            WHEN x <= 11 THEN 'EV'
-            ELSE 'REGULAR' END
-FROM floor f,
-     SYSTEM_RANGE(1, 150) x
-WHERE f.floor_number = 8;
-
-INSERT INTO parking_space (space_id, floor_id, space_number, is_occupied, type)
-SELECT UUID(), f.floor_id, CONCAT('5', LPAD(x, 3, '0')), FALSE,
-       CASE WHEN x <= 3 THEN 'ACCESSIBLE'
-            WHEN x <= 11 THEN 'EV'
-            ELSE 'REGULAR' END
-FROM floor f,
-     SYSTEM_RANGE(1, 150) x
-WHERE f.floor_number = 5;
-
-INSERT INTO parking_space (space_id, floor_id, space_number, is_occupied, type)
-SELECT UUID(), f.floor_id, CONCAT('7', LPAD(x, 3, '0')), FALSE,
-       CASE WHEN x <= 3 THEN 'ACCESSIBLE'
-            WHEN x <= 11 THEN 'EV'
-            ELSE 'REGULAR' END
-FROM floor f,
-     SYSTEM_RANGE(1, 150) x
-WHERE f.floor_number = 7;
-
--- Assign parking passes to users
-INSERT INTO parking_pass (pass_id, user_id, issue_date, expiry_date)
-SELECT UUID(), user_id, CURRENT_DATE, DATEADD('YEAR', 1, CURRENT_DATE)
-FROM app_user
-WHERE role = 'employee';
-
--- Assign parking spaces to parking passes
-INSERT INTO parking_assignment (assignment_id, pass_id, space_id, assigned_date)
-SELECT UUID(), p.pass_id, s.space_id, CURRENT_DATE
-FROM parking_pass p
-         JOIN parking_space s ON s.is_occupied = FALSE
-LIMIT 150;
+-- Insert Parking Spots for Levels 1 to 4 (101 to 426)
+INSERT INTO PARKING_SPOT (spot_number, is_occupied, type, user_id)
+SELECT
+    CONCAT(floor, LPAD(spot, 2, '0')),
+    FALSE,
+    CASE
+        WHEN spot <= 3 THEN 'handicap'
+        WHEN spot <= 8 THEN 'ev'
+        ELSE 'regular'
+        END,
+    NULL
+FROM (VALUES (1), (2), (3), (4)) AS floors(floor)
+         JOIN SYSTEM_RANGE(1, 26) AS spots(spot);
