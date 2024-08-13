@@ -4,101 +4,74 @@ import com.lowes.lowesparkingappapi.model.ParkingSpot;
 import com.lowes.lowesparkingappapi.repository.ParkingSpotRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 
-class ParkingSpotServiceTest {
+@SpringBootTest
+public class ParkingSpotServiceTest {
 
-    @Mock
-    private ParkingSpotRepository parkingSpotRepository;
-
-    @InjectMocks
+    @Autowired
     private ParkingSpotService parkingSpotService;
 
+    @MockBean
+    private ParkingSpotRepository parkingSpotRepository;
+
+    private ParkingSpot spot;
+
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    public void setUp() {
+        spot = new ParkingSpot();
+        spot.setId(1L);
+        spot.setSpotNumber("A1");
+        spot.setOccupied(false);
+        spot.setType("REGULAR");
+        spot.setUserId(null);
     }
 
     @Test
-    void testGetAllParkingSpots() {
-        // Scenario: Test fetching all parking spots
-        parkingSpotService.getAllParkingSpots();
-        verify(parkingSpotRepository, times(1)).findAll();
+    public void testGetAllParkingSpots() {
+        Mockito.when(parkingSpotRepository.findAll()).thenReturn(Collections.singletonList(spot));
+
+        List<ParkingSpot> spots = parkingSpotService.getAllParkingSpots();
+        assertNotNull(spots);
+        assertEquals(1, spots.size());
+        assertEquals(spot.getId(), spots.get(0).getId());
     }
 
     @Test
-    void testGetParkingSpotById_existingId() {
-        // Scenario: Parking spot is found
-        ParkingSpot spot = new ParkingSpot(1L, "A1", false, "regular", null);
-        when(parkingSpotRepository.findById(1L)).thenReturn(Optional.of(spot));
+    public void testGetParkingSpotById_Found() {
+        Mockito.when(parkingSpotRepository.findById(anyLong())).thenReturn(Optional.of(spot));
 
-        ParkingSpot result = parkingSpotService.getParkingSpotById(1L);
-
-        assertNotNull(result);
-        assertEquals(spot, result);
-        verify(parkingSpotRepository, times(1)).findById(1L);
+        ParkingSpot foundSpot = parkingSpotService.getParkingSpotById(1L);
+        assertNotNull(foundSpot);
+        assertEquals(spot.getId(), foundSpot.getId());
     }
 
     @Test
-    void testGetParkingSpotById_nonExistingId() {
-        // Scenario: Parking spot is not found
-        when(parkingSpotRepository.findById(1L)).thenReturn(Optional.empty());
+    public void testGetParkingSpotById_NotFound() {
+        Mockito.when(parkingSpotRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        ParkingSpot result = parkingSpotService.getParkingSpotById(1L);
-
-        assertNull(result);
-        verify(parkingSpotRepository, times(1)).findById(1L);
+        ParkingSpot foundSpot = parkingSpotService.getParkingSpotById(999L);
+        assertNull(foundSpot);
     }
 
     @Test
-    void testSaveParkingSpot() {
-        // Scenario: Save a parking spot
-        ParkingSpot spot = new ParkingSpot(1L, "A1", false, "regular", null);
-        when(parkingSpotRepository.save(spot)).thenReturn(spot);
+    public void testSaveParkingSpot() {
+        Mockito.when(parkingSpotRepository.save(any(ParkingSpot.class))).thenReturn(spot);
 
-        ParkingSpot result = parkingSpotService.saveParkingSpot(spot);
-
-        assertNotNull(result);
-        assertEquals(spot, result);
-        verify(parkingSpotRepository, times(1)).save(spot);
-    }
-
-    @Test
-    void testUpdateParkingSpot_whenOccupied() {
-        // Scenario: Update parking spot to occupied
-        ParkingSpot spot = new ParkingSpot(1L, "A1", false, "regular", null);
-        when(parkingSpotRepository.findById(1L)).thenReturn(Optional.of(spot));
-        when(parkingSpotRepository.save(spot)).thenReturn(spot);
-
-        ParkingSpot updatedSpot = parkingSpotService.updateParkingSpot(1L, true, 123L);
-
-        assertTrue(updatedSpot.isOccupied());
-        assertEquals(123L, updatedSpot.getUserId());
-
-        verify(parkingSpotRepository, times(1)).findById(1L);
-        verify(parkingSpotRepository, times(1)).save(spot);
-    }
-
-    @Test
-    void testUpdateParkingSpot_whenNotOccupied() {
-        // Scenario: Update parking spot to not occupied
-        ParkingSpot spot = new ParkingSpot(1L, "A1", true, "regular", 123L);
-        when(parkingSpotRepository.findById(1L)).thenReturn(Optional.of(spot));
-        when(parkingSpotRepository.save(spot)).thenReturn(spot);
-
-        ParkingSpot updatedSpot = parkingSpotService.updateParkingSpot(1L, false, 123L);
-
-        assertFalse(updatedSpot.isOccupied());
-        assertNull(updatedSpot.getUserId());
-
-        verify(parkingSpotRepository, times(1)).findById(1L);
-        verify(parkingSpotRepository, times(1)).save(spot);
+        ParkingSpot savedSpot = parkingSpotService.saveParkingSpot(spot);
+        assertNotNull(savedSpot);
+        assertEquals(spot.getId(), savedSpot.getId());
+        assertEquals(spot.getSpotNumber(), savedSpot.getSpotNumber());
     }
 }

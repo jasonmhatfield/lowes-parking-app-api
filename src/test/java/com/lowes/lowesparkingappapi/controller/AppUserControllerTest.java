@@ -4,62 +4,104 @@ import com.lowes.lowesparkingappapi.model.AppUser;
 import com.lowes.lowesparkingappapi.service.AppUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class AppUserControllerTest {
+@WebMvcTest(AppUserController.class)
+public class AppUserControllerTest {
 
-    @Mock
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
     private AppUserService userService;
 
-    @InjectMocks
-    private AppUserController appUserController;
+    private AppUser user;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    public void setUp() {
+        user = new AppUser();
+        user.setId(1L);
+        user.setFirstName("Test");
+        user.setLastName("User");
+        user.setEmail("testuser@example.com");
+        user.setHasHandicapPlacard(true);
+        user.setHasEv(false);
+        user.setRole("USER");
     }
 
     @Test
-    void getAllUsers_shouldReturnListOfUsers() {
-        AppUser user = new AppUser(1L, "John", "Doe", "john.doe@example.com", false, false, "user");
-        when(userService.getAllUsers()).thenReturn(Collections.singletonList(user));
+    public void testGetAllUsers() throws Exception {
+        Mockito.when(userService.getAllUsers()).thenReturn(Collections.singletonList(user));
 
-        List<AppUser> users = appUserController.getAllUsers();
-
-        assertEquals(1, users.size());
-        assertEquals("John", users.get(0).getFirstName());
+        mockMvc.perform(get("/api/users"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[{'id':1,'firstName':'Test','lastName':'User'," +
+                        "'email':'testuser@example.com','hasHandicapPlacard':true,'hasEv':false,'role':'USER'}]"));
     }
 
     @Test
-    void createUser_shouldReturnCreatedUser() {
-        AppUser user = new AppUser(1L, "John", "Doe", "john.doe@example.com", false, false, "user");
-        when(userService.saveUser(user)).thenReturn(user);
+    public void testGetUserById() throws Exception {
+        Mockito.when(userService.getUserById(anyLong())).thenReturn(Optional.of(user));
 
-        AppUser createdUser = appUserController.createUser(user);
-
-        assertEquals(user, createdUser);
+        mockMvc.perform(get("/api/users/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{'id':1,'firstName':'Test','lastName':'User'," +
+                        "'email':'testuser@example.com','hasHandicapPlacard':true,'hasEv':false,'role':'USER'}"));
     }
 
     @Test
-    void updateUser_shouldReturnUpdatedUser() {
-        AppUser user = new AppUser(1L, "John", "Doe", "john.doe@example.com", false, false, "user");
-        when(userService.saveUser(user)).thenReturn(user);
+    public void testGetUserByIdNotFound() throws Exception {
+        Mockito.when(userService.getUserById(anyLong())).thenReturn(Optional.empty());
 
-        AppUser updatedUser = appUserController.updateUser(1L, user);
-
-        assertEquals(user, updatedUser);
+        mockMvc.perform(get("/api/users/999"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void deleteUser_shouldDeleteUser() {
-        appUserController.deleteUser(1L);
+    public void testCreateUser() throws Exception {
+        Mockito.when(userService.saveUser(any(AppUser.class))).thenReturn(user);
+
+        mockMvc.perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"firstName\":\"Test\",\"lastName\":\"User\",\"email\":\"testuser@example.com\"," +
+                                "\"hasHandicapPlacard\":true,\"hasEv\":false,\"role\":\"USER\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{'id':1,'firstName':'Test','lastName':'User'," +
+                        "'email':'testuser@example.com','hasHandicapPlacard':true,'hasEv':false,'role':'USER'}"));
+    }
+
+    @Test
+    public void testUpdateUser() throws Exception {
+        Mockito.when(userService.saveUser(any(AppUser.class))).thenReturn(user);
+
+        mockMvc.perform(put("/api/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"firstName\":\"Test\",\"lastName\":\"User\",\"email\":\"testuser@example.com\"," +
+                                "\"hasHandicapPlacard\":true,\"hasEv\":false,\"role\":\"USER\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{'id':1,'firstName':'Test','lastName':'User'," +
+                        "'email':'testuser@example.com','hasHandicapPlacard':true,'hasEv':false,'role':'USER'}"));
+    }
+
+    @Test
+    public void testDeleteUser() throws Exception {
+        Mockito.doNothing().when(userService).deleteUser(anyLong());
+
+        mockMvc.perform(delete("/api/users/1"))
+                .andExpect(status().isNoContent());
     }
 }

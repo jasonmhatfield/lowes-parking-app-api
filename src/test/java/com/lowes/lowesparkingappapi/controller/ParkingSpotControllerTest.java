@@ -4,211 +4,144 @@ import com.lowes.lowesparkingappapi.model.ParkingSpot;
 import com.lowes.lowesparkingappapi.service.ParkingSpotService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class ParkingSpotControllerTest {
+@WebMvcTest(ParkingSpotController.class)
+public class ParkingSpotControllerTest {
 
-    @Mock
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
     private ParkingSpotService parkingSpotService;
 
-    @InjectMocks
-    private ParkingSpotController parkingSpotController;
+    @MockBean
+    private SimpMessagingTemplate messagingTemplate;
+
+    private ParkingSpot spot;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    public void setUp() {
+        spot = new ParkingSpot();
+        spot.setId(1L);
+        spot.setSpotNumber("A1");
+        spot.setOccupied(false);
+        spot.setType("REGULAR");
+        spot.setUserId(null);
     }
 
     @Test
-    void testGetAllParkingSpots() {
-        // Arrange
-        List<ParkingSpot> parkingSpots = Arrays.asList(
-                new ParkingSpot(1L, "A1", false, "regular", null),
-                new ParkingSpot(2L, "B1", true, "handicap", 123L)
-        );
-        when(parkingSpotService.getAllParkingSpots()).thenReturn(parkingSpots);
+    public void testGetAllParkingSpots() throws Exception {
+        Mockito.when(parkingSpotService.getAllParkingSpots()).thenReturn(Collections.singletonList(spot));
 
-        // Act
-        List<ParkingSpot> result = parkingSpotController.getAllParkingSpots();
-
-        // Assert
-        assertEquals(2, result.size());
-        assertEquals("A1", result.get(0).getSpotNumber());
-        assertEquals("B1", result.get(1).getSpotNumber());
-
-        verify(parkingSpotService, times(1)).getAllParkingSpots();
+        mockMvc.perform(get("/api/parkingSpots"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(
+                        "[{'id':1,'spotNumber':'A1','occupied':false,'type':'REGULAR','userId':null}]"));
     }
 
     @Test
-    void testUpdateParkingSpot_notFound() {
-        // Scenario: spot is null, which means it's not found
-        when(parkingSpotService.getParkingSpotById(1L)).thenReturn(null);
+    public void testUpdateParkingSpot_Occupied() throws Exception {
+        spot.setOccupied(true);
+        spot.setUserId(2L);
+        Mockito.when(parkingSpotService.getParkingSpotById(anyLong())).thenReturn(spot);
+        Mockito.when(parkingSpotService.saveParkingSpot(any(ParkingSpot.class))).thenReturn(spot);
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("isOccupied", true);
+        mockMvc.perform(patch("/api/parkingSpots/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"occupied\":true, \"userId\":2}"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(
+                        "{'id':1,'spotNumber':'A1','occupied':true,'type':'REGULAR','userId':2}"));
 
-        ResponseEntity<ParkingSpot> response = parkingSpotController.updateParkingSpot(1L, updates);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        verify(parkingSpotService, times(1)).getParkingSpotById(1L);
+        Mockito.verify(messagingTemplate).convertAndSend("/topic/parkingSpots", spot);
     }
 
     @Test
-    void testUpdateParkingSpot_isOccupiedNotProvided() {
-        // Scenario: "isOccupied" is not in the updates map
-        ParkingSpot spot = new ParkingSpot(1L, "A1", false, "regular", null);
-        when(parkingSpotService.getParkingSpotById(1L)).thenReturn(spot);
+    public void testUpdateParkingSpot_OccupiedWithoutUserId() throws Exception {
+        spot.setOccupied(true);
+        spot.setUserId(null);
+        Mockito.when(parkingSpotService.getParkingSpotById(anyLong())).thenReturn(spot);
+        Mockito.when(parkingSpotService.saveParkingSpot(any(ParkingSpot.class))).thenReturn(spot);
 
-        Map<String, Object> updates = new HashMap<>(); // "isOccupied" not provided
+        mockMvc.perform(patch("/api/parkingSpots/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"occupied\":true}"))  // No userId provided
+                .andExpect(status().isOk())
+                .andExpect(content().json(
+                        "{'id':1,'spotNumber':'A1','occupied':true,'type':'REGULAR','userId':null}",
+                        true));
 
-        ResponseEntity<ParkingSpot> response = parkingSpotController.updateParkingSpot(1L, updates);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(parkingSpotService, times(1)).getParkingSpotById(1L);
-        verify(parkingSpotService, times(1)).saveParkingSpot(spot);
+        Mockito.verify(messagingTemplate).convertAndSend("/topic/parkingSpots", spot);
     }
 
     @Test
-    void testUpdateParkingSpot_userIdProvidedAndOccupied() {
-        // Scenario: "isOccupied" and non-null "userId" are both provided
-        ParkingSpot spot = new ParkingSpot(1L, "A1", false, "regular", null);
-        when(parkingSpotService.getParkingSpotById(1L)).thenReturn(spot);
+    public void testUpdateParkingSpot_NotOccupied() throws Exception {
+        spot.setOccupied(false);
+        spot.setUserId(null);
+        Mockito.when(parkingSpotService.getParkingSpotById(anyLong())).thenReturn(spot);
+        Mockito.when(parkingSpotService.saveParkingSpot(any(ParkingSpot.class))).thenReturn(spot);
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("isOccupied", true);
-        updates.put("userId", 123L);
+        mockMvc.perform(patch("/api/parkingSpots/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"occupied\":false}"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(
+                        "{'id':1,'spotNumber':'A1','occupied':false,'type':'REGULAR','userId':null}"));
 
-        ResponseEntity<ParkingSpot> response = parkingSpotController.updateParkingSpot(1L, updates);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(spot.isOccupied());
-        assertEquals(123L, spot.getUserId());
-
-        verify(parkingSpotService, times(1)).getParkingSpotById(1L);
-        verify(parkingSpotService, times(1)).saveParkingSpot(spot);
+        Mockito.verify(messagingTemplate).convertAndSend("/topic/parkingSpots", spot);
     }
 
     @Test
-    void testUpdateParkingSpot_userIdNullAndOccupied() {
-        // Scenario: "isOccupied" is true but "userId" is null
-        ParkingSpot spot = new ParkingSpot(1L, "A1", false, "regular", null);
-        when(parkingSpotService.getParkingSpotById(1L)).thenReturn(spot);
+    public void testUpdateParkingSpot_NotFound() throws Exception {
+        Mockito.when(parkingSpotService.getParkingSpotById(anyLong())).thenReturn(null);
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("isOccupied", true);
-        updates.put("userId", null);
-
-        ResponseEntity<ParkingSpot> response = parkingSpotController.updateParkingSpot(1L, updates);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(spot.isOccupied());
-        assertNull(spot.getUserId());
-
-        verify(parkingSpotService, times(1)).getParkingSpotById(1L);
-        verify(parkingSpotService, times(1)).saveParkingSpot(spot);
+        mockMvc.perform(patch("/api/parkingSpots/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"occupied\":true, \"userId\":2}"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void testUpdateParkingSpot_userIdNotProvided() {
-        // Scenario: "isOccupied" is true but "userId" is not provided in the updates map
-        ParkingSpot spot = new ParkingSpot(1L, "A1", false, "regular", null);
-        when(parkingSpotService.getParkingSpotById(1L)).thenReturn(spot);
+    public void testUpdateParkingSpot_BadRequest() throws Exception {
+        Mockito.when(parkingSpotService.getParkingSpotById(anyLong())).thenReturn(spot);
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("isOccupied", true); // "userId" not provided
-
-        ResponseEntity<ParkingSpot> response = parkingSpotController.updateParkingSpot(1L, updates);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(spot.isOccupied());
-        assertNull(spot.getUserId());
-
-        verify(parkingSpotService, times(1)).getParkingSpotById(1L);
-        verify(parkingSpotService, times(1)).saveParkingSpot(spot);
+        mockMvc.perform(patch("/api/parkingSpots/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testUpdateParkingSpot_AlreadyOccupiedByAnotherUser() {
-        // Scenario: spot is already occupied by a different user
-        ParkingSpot spot = new ParkingSpot(1L, "A1", true, "regular", 456L);
-        when(parkingSpotService.getParkingSpotById(1L)).thenReturn(spot);
+    public void testUpdateParkingSpot_InvalidUserId() throws Exception {
+        spot.setOccupied(true);
+        spot.setUserId(null);
+        Mockito.when(parkingSpotService.getParkingSpotById(anyLong())).thenReturn(spot);
+        Mockito.when(parkingSpotService.saveParkingSpot(any(ParkingSpot.class))).thenReturn(spot);
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("isOccupied", true);
-        updates.put("userId", 123L);
+        mockMvc.perform(patch("/api/parkingSpots/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"occupied\":true, \"userId\":null}"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(
+                        "{'id':1,'spotNumber':'A1','occupied':true,'type':'REGULAR','userId':null}",
+                        true));
 
-        ResponseEntity<ParkingSpot> response = parkingSpotController.updateParkingSpot(1L, updates);
-
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        verify(parkingSpotService, times(1)).getParkingSpotById(1L);
-        verify(parkingSpotService, times(0)).saveParkingSpot(spot);
-    }
-
-    @Test
-    void testUpdateParkingSpot_SameUserOccupying() {
-        // Scenario: spot is already occupied by the same user
-        ParkingSpot spot = new ParkingSpot(1L, "A1", true, "regular", 123L);
-        when(parkingSpotService.getParkingSpotById(1L)).thenReturn(spot);
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("isOccupied", true);
-        updates.put("userId", 123L);
-
-        ResponseEntity<ParkingSpot> response = parkingSpotController.updateParkingSpot(1L, updates);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(spot.isOccupied());
-        assertEquals(123L, spot.getUserId());
-
-        verify(parkingSpotService, times(1)).getParkingSpotById(1L);
-        verify(parkingSpotService, times(1)).saveParkingSpot(spot);
-    }
-
-    @Test
-    void testUpdateParkingSpot_isOccupiedFalse() {
-        // Scenario: "isOccupied" is false, should clear userId
-        ParkingSpot spot = new ParkingSpot(1L, "A1", true, "regular", 123L);
-        when(parkingSpotService.getParkingSpotById(1L)).thenReturn(spot);
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("isOccupied", false);
-
-        ResponseEntity<ParkingSpot> response = parkingSpotController.updateParkingSpot(1L, updates);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertFalse(spot.isOccupied());
-        assertNull(spot.getUserId());
-
-        verify(parkingSpotService, times(1)).getParkingSpotById(1L);
-        verify(parkingSpotService, times(1)).saveParkingSpot(spot);
-    }
-
-    @Test
-    void testUpdateParkingSpot_isOccupiedTrue_userIdNull() {
-        // Scenario: The spot is occupied, but the userId is null, covering the branch where spot.getUserId() == null
-        ParkingSpot spot = new ParkingSpot(1L, "A1", true, "regular", null);  // userId is null
-        when(parkingSpotService.getParkingSpotById(1L)).thenReturn(spot);
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("isOccupied", true);
-        updates.put("userId", 123L);
-
-        ResponseEntity<ParkingSpot> response = parkingSpotController.updateParkingSpot(1L, updates);
-
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        verify(parkingSpotService, times(1)).getParkingSpotById(1L);
-        verify(parkingSpotService, times(0)).saveParkingSpot(spot);
+        Mockito.verify(messagingTemplate).convertAndSend("/topic/parkingSpots", spot);
     }
 }

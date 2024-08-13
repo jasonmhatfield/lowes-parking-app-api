@@ -4,38 +4,37 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ParkingSpotTest {
+public class ParkingSpotTest {
 
     @Test
-    void parkingSpotModel_shouldWorkCorrectly() {
-        // Test AllArgsConstructor
-        ParkingSpot spot = new ParkingSpot(1L, "A1", false, "regular", null);
+    public void testNoArgsConstructor() {
+        ParkingSpot spot = new ParkingSpot();
+        assertNotNull(spot);
+    }
+
+    @Test
+    public void testAllArgsConstructor() {
+        ParkingSpot spot = new ParkingSpot(1L, "A1", false, "REGULAR", null);
+        assertEquals(1L, spot.getId());
+        assertEquals("A1", spot.getSpotNumber());
+        assertFalse(spot.isOccupied());
+        assertEquals("REGULAR", spot.getType());
+        assertNull(spot.getUserId());
+    }
+
+    @Test
+    public void testSettersAndGetters() {
+        ParkingSpot spot = new ParkingSpot();
+        spot.setId(1L);
+        spot.setSpotNumber("A1");
+        spot.setOccupied(false);
+        spot.setType("REGULAR");
+        spot.setUserId(null);
 
         assertEquals(1L, spot.getId());
         assertEquals("A1", spot.getSpotNumber());
         assertFalse(spot.isOccupied());
-        assertEquals("regular", spot.getType());
+        assertEquals("REGULAR", spot.getType());
         assertNull(spot.getUserId());
-
-        // Test NoArgsConstructor and Setters
-        ParkingSpot spot2 = new ParkingSpot();
-        spot2.setId(2L);
-        spot2.setSpotNumber("B2");
-        spot2.setOccupied(true);
-        spot2.setType("handicap");
-        spot2.setUserId(3L);
-
-        assertEquals(2L, spot2.getId());
-        assertEquals("B2", spot2.getSpotNumber());
-        assertTrue(spot2.isOccupied());
-        assertEquals("handicap", spot2.getType());
-        assertEquals(3L, spot2.getUserId());
-
-        // Test Getters
-        assertEquals(2L, spot2.getId());
-        assertEquals("B2", spot2.getSpotNumber());
-        assertTrue(spot2.isOccupied());
-        assertEquals("handicap", spot2.getType());
-        assertEquals(3L, spot2.getUserId());
     }
 }

@@ -4,55 +4,66 @@ import com.lowes.lowesparkingappapi.model.Gate;
 import com.lowes.lowesparkingappapi.repository.GateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 
-class GateServiceTest {
+@SpringBootTest
+public class GateServiceTest {
 
-    @Mock
-    private GateRepository gateRepository;
-
-    @InjectMocks
+    @Autowired
     private GateService gateService;
 
+    @MockBean
+    private GateRepository gateRepository;
+
+    private Gate gate;
+
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    public void setUp() {
+        gate = new Gate();
+        gate.setId(1L);
+        gate.setGateName("Main Gate");
+        gate.setOperational(true);
     }
 
     @Test
-    void getAllGates_shouldReturnListOfGates() {
-        Gate gate = new Gate(1L, "Main Gate", true);
-        when(gateRepository.findAll()).thenReturn(Collections.singletonList(gate));
+    public void testGetAllGates() {
+        Mockito.when(gateRepository.findAll()).thenReturn(Collections.singletonList(gate));
 
         List<Gate> gates = gateService.getAllGates();
-
+        assertNotNull(gates);
         assertEquals(1, gates.size());
+        assertEquals(gate.getId(), gates.get(0).getId());
     }
 
     @Test
-    void updateGateStatus_shouldReturnUpdatedGate() {
-        Gate gate = new Gate(1L, "Main Gate", true);
-        when(gateRepository.findById(1L)).thenReturn(Optional.of(gate));
-        when(gateRepository.save(gate)).thenReturn(gate);
+    public void testUpdateGateStatus_Found() {
+        Mockito.when(gateRepository.findById(anyLong())).thenReturn(Optional.of(gate));
+        Mockito.when(gateRepository.save(any(Gate.class))).thenReturn(gate);
 
         Gate updatedGate = gateService.updateGateStatus(1L, false);
-
+        assertNotNull(updatedGate);
         assertFalse(updatedGate.isOperational());
+        assertEquals(gate.getId(), updatedGate.getId());
     }
 
     @Test
-    void updateGateStatus_shouldThrowExceptionIfGateNotFound() {
-        when(gateRepository.findById(1L)).thenReturn(Optional.empty());
+    public void testUpdateGateStatus_NotFound() {
+        Mockito.when(gateRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> gateService.updateGateStatus(1L, false));
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> gateService.updateGateStatus(999L, false));
+
+        assertEquals("Gate not found with id: 999", exception.getMessage());
     }
 }
