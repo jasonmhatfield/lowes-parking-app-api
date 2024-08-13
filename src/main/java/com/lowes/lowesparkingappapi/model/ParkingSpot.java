@@ -18,6 +18,6 @@ public class ParkingSpot {
 
     private String spotNumber;
     private boolean isOccupied;
-    private String type; // regular, handicap, ev
+    private String type;
     private Long userId;
 }

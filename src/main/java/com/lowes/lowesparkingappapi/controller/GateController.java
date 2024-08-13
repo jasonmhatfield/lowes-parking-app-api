@@ -29,7 +29,7 @@ public class GateController {
     public Gate updateGateStatus(@PathVariable Long id, @RequestParam boolean isOperational) {
         Gate updatedGate = gateService.updateGateStatus(id, isOperational);
         System.out.println("Broadcasting gate update: " + updatedGate);
-        messagingTemplate.convertAndSend("/topic/gates", updatedGate); // Broadcast to /topic/gates
+        messagingTemplate.convertAndSend("/topic/gates", updatedGate);
         return updatedGate;
     }
 }

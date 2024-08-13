@@ -14,7 +14,7 @@ import java.util.Map;
 @RequestMapping("/api")
 public class ParkingSpotController {
     private final ParkingSpotService parkingSpotService;
-    private final SimpMessagingTemplate messagingTemplate; // For WebSocket messages
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
     public ParkingSpotController(ParkingSpotService parkingSpotService, SimpMessagingTemplate messagingTemplate) {
@@ -50,7 +50,6 @@ public class ParkingSpotController {
                 userId = updates.get("userId") != null ? ((Number) updates.get("userId")).longValue() : null;
             }
 
-            // Update the spot's status
             spot.setOccupied(isOccupied);
             spot.setUserId(isOccupied ? userId : null);
 
@@ -62,7 +61,6 @@ public class ParkingSpotController {
         if (updated) {
             ParkingSpot updatedSpot = parkingSpotService.saveParkingSpot(spot);
 
-            // Broadcast the updated spot to clients
             messagingTemplate.convertAndSend("/topic/parkingSpots", updatedSpot);
 
             System.out.println("Broadcasting parking spot update: " + updatedSpot);
@@ -70,6 +68,6 @@ public class ParkingSpotController {
             return ResponseEntity.ok(updatedSpot);
         }
 
-        return ResponseEntity.badRequest().build(); // If no update was made, return a bad request
+        return ResponseEntity.badRequest().build();
     }
 }
