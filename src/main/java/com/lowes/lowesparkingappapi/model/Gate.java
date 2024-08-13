@@ -12,6 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 public class Gate {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

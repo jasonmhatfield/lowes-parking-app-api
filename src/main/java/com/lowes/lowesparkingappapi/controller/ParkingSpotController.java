@@ -13,6 +13,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class ParkingSpotController {
+
     private final ParkingSpotService parkingSpotService;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -24,16 +25,11 @@ public class ParkingSpotController {
 
     @GetMapping("/parkingSpots")
     public List<ParkingSpot> getAllParkingSpots() {
-        List<ParkingSpot> spots = parkingSpotService.getAllParkingSpots();
-        spots.forEach(spot -> System.out.println("ParkingSpot: " + spot.getSpotNumber() + " - isOccupied: " + spot.isOccupied()));
-        return spots;
+        return parkingSpotService.getAllParkingSpots();
     }
 
     @PatchMapping("/parkingSpots/{id}")
     public ResponseEntity<ParkingSpot> updateParkingSpot(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
-        System.out.println("Received update request for spot ID: " + id);
-        System.out.println("Request payload: " + updates);
-
         ParkingSpot spot = parkingSpotService.getParkingSpotById(id);
 
         if (spot == null) {
@@ -42,29 +38,25 @@ public class ParkingSpotController {
 
         boolean updated = false;
 
-        if (updates.containsKey("occupied")) { // Check the key
+        if (updates.containsKey("occupied")) {
             Boolean isOccupied = (Boolean) updates.get("occupied");
             Long userId = null;
 
-            if (updates.containsKey("userId")) {
-                userId = updates.get("userId") != null ? ((Number) updates.get("userId")).longValue() : null;
+            if (isOccupied && updates.containsKey("userId")) {
+                Object userIdObject = updates.get("userId");
+                if (userIdObject != null) {
+                    userId = ((Number) userIdObject).longValue();
+                }
             }
 
             spot.setOccupied(isOccupied);
             spot.setUserId(isOccupied ? userId : null);
-
             updated = true;
-
-            System.out.println("Updated ParkingSpot: " + spot.getSpotNumber() + " - isOccupied: " + spot.isOccupied() + ", userId: " + spot.getUserId());
         }
 
         if (updated) {
             ParkingSpot updatedSpot = parkingSpotService.saveParkingSpot(spot);
-
             messagingTemplate.convertAndSend("/topic/parkingSpots", updatedSpot);
-
-            System.out.println("Broadcasting parking spot update: " + updatedSpot);
-
             return ResponseEntity.ok(updatedSpot);
         }
 

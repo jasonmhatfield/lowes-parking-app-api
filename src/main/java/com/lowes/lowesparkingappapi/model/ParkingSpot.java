@@ -12,6 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 public class ParkingSpot {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -27,14 +27,4 @@ public class ParkingSpotService {
     public ParkingSpot saveParkingSpot(ParkingSpot spot) {
         return parkingSpotRepository.save(spot);
     }
-
-    public boolean isParkingFull() {
-        return parkingSpotRepository.findAll().stream().allMatch(ParkingSpot::isOccupied);
-    }
-
-    public boolean isEvParkingFull() {
-        return parkingSpotRepository.findAll().stream()
-                .filter(spot -> "ev".equals(spot.getType()))
-                .allMatch(ParkingSpot::isOccupied);
-    }
 }

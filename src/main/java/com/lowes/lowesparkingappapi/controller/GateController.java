@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/gates")
 public class GateController {
+
     private final GateService gateService;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -20,15 +21,14 @@ public class GateController {
         this.messagingTemplate = messagingTemplate;
     }
 
-    @GetMapping("/gates")
+    @GetMapping
     public List<Gate> getAllGates() {
         return gateService.getAllGates();
     }
 
-    @PatchMapping("/gates/{id}")
+    @PatchMapping("/{id}")
     public Gate updateGateStatus(@PathVariable Long id, @RequestParam boolean isOperational) {
         Gate updatedGate = gateService.updateGateStatus(id, isOperational);
-        System.out.println("Broadcasting gate update: " + updatedGate);
         messagingTemplate.convertAndSend("/topic/gates", updatedGate);
         return updatedGate;
     }
