@@ -1,17 +1,17 @@
--- Insert Gates
+-- Insert Gates --
 INSERT INTO GATE (gate_name, is_operational)
 VALUES
     ('South Gate', TRUE),
     ('North Gate', TRUE);
 
--- Insert an admin user and hard-coded employees
+-- Insert an admin user and hard-coded employees --
 INSERT INTO APP_USER (first_name, last_name, email, role, has_handicap_placard, has_ev)
 VALUES
-    ('Jason', 'Hatfield', 'jason.hatfield@lowes.com', 'admin', FALSE, FALSE),
-    ('Michael', 'Smith', 'michael.smith@lowes.com', 'employee', TRUE, FALSE),
+    ('Admin', 'User', 'lowes.admin@lowes.com', 'admin', FALSE, FALSE),
+    ('Mark', 'Jess', 'mark.jess@lowes.com', 'employee', TRUE, FALSE),
     ('Emily', 'Johnson', 'emily.johnson@lowes.com', 'employee', FALSE, TRUE);
 
--- Insert 98 additional employee users
+-- Insert 98 additional employee users --
 INSERT INTO APP_USER (first_name, last_name, email, role, has_handicap_placard, has_ev)
 VALUES
     ('David', 'Miller', 'david.miller@lowes.com', 'employee', FALSE, TRUE),
@@ -126,3 +126,55 @@ SELECT
     NULL
 FROM (VALUES (1), (2), (3), (4)) AS floors(floor)
          JOIN SYSTEM_RANGE(1, 26) AS spots(spot);
+
+-- Reset all parking spots
+UPDATE PARKING_SPOT SET is_occupied = FALSE, user_id = NULL;
+
+-- Create a temporary table to store available users
+CREATE TABLE AVAILABLE_USERS AS
+SELECT id, has_handicap_placard, has_ev
+FROM APP_USER
+WHERE role = 'employee'
+  AND email NOT IN ('lowes.admin@lowes.com', 'mark.jess@lowes.com', 'emily.johnson@lowes.com');
+
+-- Fill Handicap spots (60% of 12 spots = 7 spots)
+MERGE INTO PARKING_SPOT PS
+    USING (
+        SELECT PS.id AS spot_id, AU.id AS user_id
+        FROM (SELECT id FROM PARKING_SPOT WHERE type = 'handicap' ORDER BY RAND() LIMIT 7) PS
+                 CROSS JOIN (SELECT id FROM AVAILABLE_USERS WHERE has_handicap_placard = TRUE ORDER BY RAND() LIMIT 1) AU
+    ) AS FS
+ON PS.id = FS.spot_id
+WHEN MATCHED THEN
+    UPDATE SET is_occupied = TRUE, user_id = FS.user_id;
+
+-- Remove assigned users from available users
+DELETE FROM AVAILABLE_USERS WHERE id IN (SELECT user_id FROM PARKING_SPOT WHERE user_id IS NOT NULL);
+
+-- Fill EV spots (60% of 20 spots = 12 spots)
+MERGE INTO PARKING_SPOT PS
+    USING (
+        SELECT PS.id AS spot_id, AU.id AS user_id
+        FROM (SELECT id FROM PARKING_SPOT WHERE type = 'ev' AND is_occupied = FALSE ORDER BY RAND() LIMIT 12) PS
+                 CROSS JOIN (SELECT id FROM AVAILABLE_USERS WHERE has_ev = TRUE ORDER BY RAND() LIMIT 1) AU
+    ) AS FS
+ON PS.id = FS.spot_id
+WHEN MATCHED THEN
+    UPDATE SET is_occupied = TRUE, user_id = FS.user_id;
+
+-- Remove assigned users from available users
+DELETE FROM AVAILABLE_USERS WHERE id IN (SELECT user_id FROM PARKING_SPOT WHERE user_id IS NOT NULL);
+
+-- Fill Regular spots (60% of 72 spots = 43 spots)
+MERGE INTO PARKING_SPOT PS
+    USING (
+        SELECT PS.id AS spot_id, AU.id AS user_id
+        FROM (SELECT id FROM PARKING_SPOT WHERE type = 'regular' AND is_occupied = FALSE ORDER BY RAND() LIMIT 43) PS
+                 CROSS JOIN (SELECT id FROM AVAILABLE_USERS ORDER BY RAND() LIMIT 1) AU
+    ) AS FS
+ON PS.id = FS.spot_id
+WHEN MATCHED THEN
+    UPDATE SET is_occupied = TRUE, user_id = FS.user_id;
+
+-- Clean up
+DROP TABLE AVAILABLE_USERS;
